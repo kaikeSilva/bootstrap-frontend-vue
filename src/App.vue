@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-import WebSocketClient from './components/WebSocketClient.vue';
+import { ConnectionIndicator, WebSocketStatus, WebSocketDebug } from '@/components/WebSocket';
 </script>
 
 <template>
@@ -10,7 +10,7 @@ import WebSocketClient from './components/WebSocketClient.vue';
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
-
+      <ConnectionIndicator />
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
@@ -18,7 +18,10 @@ import WebSocketClient from './components/WebSocketClient.vue';
     </div>
   </header>
 
-  <WebSocketClient />
+  <div class="websocket-components-container">
+    <WebSocketStatus />
+    <WebSocketDebug />
+  </div>
 
   <RouterView />
 </template>
@@ -38,7 +41,7 @@ nav {
   width: 100%;
   font-size: 12px;
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 nav a.router-link-exact-active {
@@ -59,6 +62,14 @@ nav a:first-of-type {
   border: 0;
 }
 
+.websocket-components-container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+}
+
 @media (min-width: 1024px) {
   header {
     display: flex;
@@ -74,15 +85,25 @@ nav a:first-of-type {
     display: flex;
     place-items: flex-start;
     flex-wrap: wrap;
+    align-items: center;
+  }
+
+  header .wrapper > * {
+    margin-bottom: 1rem;
   }
 
   nav {
     text-align: left;
     margin-left: -1rem;
     font-size: 1rem;
-
     padding: 1rem 0;
-    margin-top: 1rem;
+    margin-top: 0;
+  }
+
+  .websocket-components-container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 </style>

@@ -65,7 +65,413 @@ docker compose up --build
 - ❌ Standard Vue.js operations
 - ❌ Build errors you haven't attempted to resolve
 
-## VUE.JS 3 SPECIFIC GUIDELINES
+## TYPESCRIPT FUNDAMENTALS FOR VUE.JS 3
+
+### Basic TypeScript Concepts
+**ESSENTIAL TYPESCRIPT KNOWLEDGE FOR VUE DEVELOPMENT:**
+
+#### 1. Type Annotations and Interfaces
+```typescript
+// Basic types
+const name: string = 'John';
+const age: number = 30;
+const isActive: boolean = true;
+const items: string[] = ['a', 'b', 'c'];
+const user: User | null = null;
+
+// Interface definition
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role?: 'admin' | 'user'; // Optional with union types
+}
+
+// Type alias
+type ApiResponse<T> = {
+  data: T;
+  success: boolean;
+  message: string;
+};
+```
+
+#### 2. Vue 3 Component Typing
+```vue
+<script setup lang="ts">
+import { ref, computed, type Ref } from 'vue';
+
+// Props with TypeScript
+interface Props {
+  title: string;
+  count?: number;
+  items: string[];
+  user?: User;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  count: 0,
+  items: () => [],
+});
+
+// Reactive refs with explicit typing
+const isLoading: Ref<boolean> = ref(false);
+const users: Ref<User[]> = ref([]);
+
+// Or use type inference (preferred when obvious)
+const message = ref(''); // inferred as Ref<string>
+const total = ref(0);    // inferred as Ref<number>
+
+// Computed with typing
+const activeUsers = computed((): User[] => {
+  return users.value.filter(u => u.role === 'admin');
+});
+
+// Function typing
+const handleSubmit = async (data: FormData): Promise<void> => {
+  isLoading.value = true;
+  try {
+    // API call
+  } catch (error: unknown) {
+    console.error('Error:', error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Event emits typing
+const emit = defineEmits<{
+  update: [value: string];
+  submit: [data: User];
+  close: [];
+}>();
+</script>
+```
+
+#### 3. Common TypeScript Errors and Solutions
+
+**ERROR: "Type 'unknown' is not assignable to type 'string'"**
+```typescript
+// ❌ WRONG
+const handleError = (error: unknown) => {
+  console.log(error.message); // Error!
+};
+
+// ✅ CORRECT - Type guard
+const handleError = (error: unknown) => {
+  if (error instanceof Error) {
+    console.log(error.message); // Safe
+  }
+  // Or type assertion if you're sure
+  console.log((error as Error).message);
+};
+```
+
+**ERROR: "Object is possibly 'null' or 'undefined'"**
+```typescript
+// ❌ WRONG
+const user = ref<User | null>(null);
+console.log(user.value.name); // Error!
+
+// ✅ CORRECT - Optional chaining
+console.log(user.value?.name);
+
+// ✅ CORRECT - Type guard
+if (user.value) {
+  console.log(user.value.name); // Safe
+}
+```
+
+**ERROR: "Property 'xyz' does not exist on type"**
+```typescript
+// ❌ WRONG - Missing property in interface
+interface User {
+  name: string;
+}
+const user: User = { name: 'John', age: 30 }; // Error!
+
+// ✅ CORRECT - Add property to interface
+interface User {
+  name: string;
+  age: number;
+}
+
+// ✅ CORRECT - Optional property
+interface User {
+  name: string;
+  age?: number; // Optional
+}
+```
+
+#### 4. API and Service Typing
+```typescript
+// Service with proper typing
+export class ApiService {
+  static async fetchUsers(): Promise<ApiResponse<User[]>> {
+    try {
+      const response = await fetch('/api/users');
+      const data: ApiResponse<User[]> = await response.json();
+      return data;
+    } catch (error: unknown) {
+      throw new Error(`Failed to fetch users: ${error}`);
+    }
+  }
+
+  static async createUser(userData: Omit<User, 'id'>): Promise<User> {
+    const response = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to create user');
+    }
+    
+    return response.json() as Promise<User>;
+  }
+}
+```
+
+#### 5. Composable Typing Patterns
+```typescript
+// Composable with proper return typing
+export function useApi<T>(url: string) {
+  const data: Ref<T | null> = ref(null);
+  const loading = ref(false);
+  const error: Ref<string | null> = ref(null);
+
+  const fetch = async (): Promise<void> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await ApiService.get<T>(url);
+      data.value = response.data;
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'An error occurred';
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  return {
+    data: readonly(data),
+    loading: readonly(loading), 
+    error: readonly(error),
+    fetch,
+  } as const; // Ensure return type is inferred correctly
+}
+
+// Usage with proper typing
+const { data: users, loading, error, fetch } = useApi<User[]>('/api/users');
+```
+
+### TypeScript Configuration Best Practices
+
+#### 1. tsconfig.json Essential Settings
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx", 
+    "src/**/*.vue"
+  ],
+  "exclude": ["node_modules"]
+}
+```
+
+#### 2. Vue Component Type Declaration
+```typescript
+// src/types/vue.d.ts
+declare module '*.vue' {
+  import type { DefineComponent } from 'vue';
+  const component: DefineComponent<{}, {}, any>;
+  export default component;
+}
+
+// Global type declarations
+declare global {
+  interface Window {
+    // Add global properties if needed
+    gtag?: (...args: any[]) => void;
+  }
+}
+```
+
+### Common Build Error Patterns and Solutions
+
+#### 1. Import/Export Issues
+```typescript
+// ❌ WRONG - Missing file extensions in some cases
+import { useUser } from '@/composables/useUser';
+
+// ✅ CORRECT - Always use proper imports for Vue
+import { useUser } from '@/composables/useUser';
+// Vite handles this correctly
+
+// ❌ WRONG - Default export issues
+export const useAuth = () => { /* ... */ };
+import useAuth from '@/composables/useAuth'; // Error!
+
+// ✅ CORRECT - Consistent export/import
+export const useAuth = () => { /* ... */ };
+import { useAuth } from '@/composables/useAuth';
+
+// OR
+export default function useAuth() { /* ... */ }
+import useAuth from '@/composables/useAuth';
+```
+
+#### 2. Reactive Type Issues
+```typescript
+// ❌ WRONG - Lost reactivity
+const state = reactive({
+  user: null as User | null,
+  items: [] as Item[],
+});
+
+// Later assignment loses typing
+state.user = fetchedUser; // May cause type issues
+
+// ✅ CORRECT - Proper reactive typing
+interface State {
+  user: User | null;
+  items: Item[];
+}
+
+const state: State = reactive({
+  user: null,
+  items: [],
+});
+
+// ✅ CORRECT - Or use refs for better type safety
+const user = ref<User | null>(null);
+const items = ref<Item[]>([]);
+```
+
+### TypeScript Debugging Strategies
+
+#### 1. Using Type Assertions Safely
+```typescript
+// ❌ DANGEROUS - Unsafe type assertion
+const data = response as User; // Could be wrong!
+
+// ✅ BETTER - Type guard function
+function isUser(obj: any): obj is User {
+  return obj && typeof obj.id === 'number' && typeof obj.name === 'string';
+}
+
+const data = response;
+if (isUser(data)) {
+  // Now data is safely typed as User
+  console.log(data.name);
+}
+
+// ✅ GOOD - Runtime validation with libraries like zod
+import { z } from 'zod';
+
+const UserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  email: z.string().email(),
+});
+
+const userData = UserSchema.parse(response); // Validates at runtime
+```
+
+#### 2. Handling Generic Components
+```vue
+<!-- Generic component typing -->
+<script setup lang="ts" generic="T">
+interface Props<T> {
+  items: T[];
+  keyExtractor: (item: T) => string;
+  renderItem: (item: T) => string;
+}
+
+const props = defineProps<Props<T>>();
+
+// Usage maintains type safety
+const displayItems = computed(() => {
+  return props.items.map(item => ({
+    key: props.keyExtractor(item),
+    display: props.renderItem(item),
+  }));
+});
+</script>
+```
+
+### Error Troubleshooting Checklist
+
+**WHEN ENCOUNTERING TYPE ERRORS:**
+
+1. **Check Interface Definitions**
+   ```bash
+   # Verify your interfaces match the actual data
+   console.log('Actual data:', JSON.stringify(data, null, 2));
+   ```
+
+2. **Verify Import/Export Consistency**
+   ```typescript
+   // Check if you're importing the right type
+   import type { User } from '@/types'; // Type-only import
+   import { User } from '@/types';      // Value import
+   ```
+
+3. **Use Type Utilities**
+   ```typescript
+   // Built-in TypeScript utilities
+   type PartialUser = Partial<User>;      // All properties optional
+   type UserName = Pick<User, 'name'>;    // Only 'name' property
+   type CreateUser = Omit<User, 'id'>;    // Exclude 'id' property
+   type UserKeys = keyof User;            // Union of all keys
+   ```
+
+4. **Enable Strict Type Checking Gradually**
+   ```json
+   // In tsconfig.json - enable one by one if errors are overwhelming
+   {
+     "compilerOptions": {
+       "strict": false,           // Start here
+       "noImplicitAny": true,     // Enable gradually
+       "strictNullChecks": true,  // Then this
+       "noImplicitReturns": true  // Finally this
+     }
+   }
+   ```
+
+**TYPESCRIPT BUILD VERIFICATION COMMANDS:**
+
+```bash
+# Always run these before requesting help
+docker compose exec vue-app npm run type-check
+docker compose exec vue-app npx vue-tsc --noEmit
+docker compose exec vue-app npm run build
+
+# Check specific file types
+docker compose exec vue-app npx tsc --noEmit --skipLibCheck src/components/MyComponent.vue
+```
+
+**REMEMBER**: TypeScript errors are often about missing types, incorrect interfaces, or unsafe operations. Always read the error message carefully and understand what TypeScript is trying to protect you from!
 
 ### Framework Knowledge (Vue 3 + TypeScript + Vite)
 **USE VUE 3 CONVENTIONS AND MODERN FEATURES:**
