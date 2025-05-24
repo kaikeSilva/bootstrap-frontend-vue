@@ -5,7 +5,6 @@
     </button>
     
     <div class="header-title">
-      <h1>Painel Administrativo</h1>
     </div>
     
     <div class="header-actions">

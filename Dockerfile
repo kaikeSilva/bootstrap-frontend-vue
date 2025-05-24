@@ -13,14 +13,8 @@ RUN npm install -D sass
 # Copia código fonte
 COPY . .
 
-# Build da aplicação para produção
-RUN npm run build
-
-# Instala serve globalmente para servir arquivos estáticos
-RUN npm install -g serve
-
 # Expõe porta 3000
 EXPOSE 3000
 
-# Comando para servir a aplicação buildada
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Comando para iniciar o servidor de desenvolvimento com hot reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

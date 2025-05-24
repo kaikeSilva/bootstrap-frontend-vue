@@ -23,5 +23,16 @@ export default defineConfig({
         additionalData: '@import "@/styles/_variables.scss";'
       }
     }
+  },
+  server: {
+    watch: {
+      usePolling: true,
+      interval: 1000
+    },
+    host: '0.0.0.0',
+    port: 3000,
+    hmr: {
+      clientPort: 3000
+    }
   }
 })
