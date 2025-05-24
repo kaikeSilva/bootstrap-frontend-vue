@@ -3,13 +3,34 @@
     <div class="sidebar-header">
       <i class="fas fa-cube logo"></i>
       <span class="brand-name" v-if="!layoutStore.isSidebarCollapsed">Admin Panel</span>
+      
+      <!-- Botão para fechar o menu no mobile -->
+      <button 
+        class="close-sidebar-btn" 
+        @click="layoutStore.setSidebarVisible(false)"
+        aria-label="Fechar menu"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <!-- Botão para colapsar o menu no desktop -->
+      <button 
+        class="collapse-sidebar-btn" 
+        @click="layoutStore.toggleSidebarCollapse()"
+        aria-label="Colapsar menu"
+      >
+        <i class="fas" :class="layoutStore.isSidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+      </button>
     </div>
     
     <nav class="sidebar-menu">
       <template v-for="item in menuItems" :key="item.title">
         <div 
           class="menu-item"
-          :class="{ 'has-children': item.children }"
+          :class="{ 
+            'has-children': item.children, 
+            'active': (item.route && isActive(item.route)) || (item.children && hasActiveChild(item.children))
+          }"
           @click="handleMenuClick(item)"
         >
           <i :class="item.icon"></i>
@@ -31,6 +52,7 @@
             v-for="child in item.children" 
             :key="child.title"
             class="submenu-item"
+            :class="{ 'active': isActive(child.route) }"
             @click="navigateTo(child.route)"
           >
             {{ child.title }}
@@ -43,7 +65,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useLayoutStore } from '@/stores/layout'
 
 interface MenuItem {
@@ -59,9 +81,20 @@ interface SubMenuItem {
 }
 
 const router = useRouter()
+const route = useRoute()
 const layoutStore = useLayoutStore()
 
 const expandedItems = ref<string[]>([])
+
+// Função para verificar se um item de menu está ativo
+const isActive = (itemRoute: string) => {
+  return route.path === itemRoute
+}
+
+// Função para verificar se um submenu tem algum item ativo
+const hasActiveChild = (children: SubMenuItem[]) => {
+  return children.some(child => isActive(child.route))
+}
 
 const menuItems: MenuItem[] = [
   {
@@ -152,9 +185,70 @@ function navigateTo(route: string) {
   padding: 1rem;
   height: $header-height;
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: relative;
   
   .sidebar-collapsed & {
     justify-content: center;
+  }
+  
+  .close-sidebar-btn {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 1;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @include mobile-only {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  
+  .collapse-sidebar-btn {
+    position: absolute;
+    right: 10px;
+    bottom: -15px;
+    background: #2c3e50;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 102;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @include mobile-only {
+      display: none;
+    }
+    
+    .sidebar-collapsed & {
+      right: -12px;
+    }
   }
 }
 
@@ -183,15 +277,33 @@ function navigateTo(route: string) {
   align-items: center;
   padding: 0.75rem 1rem;
   cursor: pointer;
-  transition: background-color $transition-speed;
+  transition: background-color $transition-speed, border-left $transition-speed;
   position: relative;
+  border-left: 3px solid transparent;
   
   &:hover {
     background-color: rgba(255,255,255,0.1);
   }
   
+  &.active {
+    background-color: rgba(255,255,255,0.1);
+    border-left: 3px solid $primary-color;
+    
+    i {
+      color: $primary-color;
+    }
+    
+    .menu-text {
+      font-weight: 600;
+    }
+  }
+  
   .sidebar-collapsed & {
     justify-content: center;
+    
+    &.active {
+      border-left: 3px solid $primary-color;
+    }
   }
 }
 
@@ -222,10 +334,19 @@ function navigateTo(route: string) {
 .submenu-item {
   padding: 0.5rem 1rem 0.5rem 3.5rem;
   cursor: pointer;
-  transition: background-color $transition-speed;
+  transition: background-color $transition-speed, border-left $transition-speed;
+  position: relative;
+  border-left: 3px solid transparent;
   
   &:hover {
     background-color: rgba(255,255,255,0.1);
+  }
+  
+  &.active {
+    background-color: rgba(255,255,255,0.1);
+    border-left: 3px solid $primary-color;
+    color: $primary-color;
+    font-weight: 600;
   }
 }
 </style>
