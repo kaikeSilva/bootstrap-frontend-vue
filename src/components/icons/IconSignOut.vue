@@ -19,7 +19,7 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  size: 20,
+  size: 24,
   viewBox: '0 0 24 24',
   className: ''
 })

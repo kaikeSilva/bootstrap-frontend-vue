@@ -1,7 +1,7 @@
 <template>
   <header class="app-header">
     <button class="menu-toggle" @click="handleMenuToggle">
-      <IconBars />
+      <IconBars :size="24" />
     </button>
     
     <div class="header-title">
@@ -81,6 +81,7 @@ function handleMenuToggle() {
   padding: 0.5rem;
   border-radius: 4px;
   transition: background-color $transition-speed;
+  color: #333; /* Cor mais escura para os ícones */
   
   &:hover {
     background-color: rgba(0, 0, 0, 0.05);
@@ -98,6 +99,9 @@ function handleMenuToggle() {
   h1 {
     font-size: 1.25rem;
     margin: 0;
+    color: #111;
+    font-weight: 700;
+    letter-spacing: 0.5px;
   }
 }
 
@@ -111,6 +115,9 @@ function handleMenuToggle() {
   @include mobile-only {
     display: none;
   }
+  color: #222;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .user-avatar {

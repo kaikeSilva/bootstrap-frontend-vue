@@ -1,7 +1,7 @@
 <template>
   <aside class="app-sidebar" :class="sidebarClasses">
     <div class="sidebar-header">
-      <IconCube class="logo" />
+      <IconCube class="logo" :size="32" />
       <span class="brand-name" v-if="!layoutStore.isSidebarCollapsed">Admin Panel</span>
       
       <!-- Botão para fechar o menu no mobile -->
@@ -10,7 +10,7 @@
         @click="layoutStore.setSidebarVisible(false)"
         aria-label="Fechar menu"
       >
-        <IconTimes />
+        <IconTimes :size="20" />
       </button>
       
       <!-- Botão para colapsar o menu no desktop -->
@@ -19,8 +19,8 @@
         @click="layoutStore.toggleSidebarCollapse()"
         aria-label="Colapsar menu"
       >
-        <IconChevronLeft v-if="!layoutStore.isSidebarCollapsed" />
-        <IconChevronRight v-else />
+        <IconChevronLeft v-if="!layoutStore.isSidebarCollapsed" :size="20" />
+        <IconChevronRight v-else :size="20" />
       </button>
     </div>
     
@@ -34,7 +34,7 @@
           }"
           @click="handleMenuClick(item)"
         >
-          <component :is="`Icon${item.icon.charAt(0).toUpperCase() + item.icon.slice(1)}`" class="menu-icon" />
+          <component :is="iconMap[item.icon]" class="menu-icon" :size="24" />
           <span class="menu-text" v-if="!layoutStore.isSidebarCollapsed">
             {{ item.title }}
           </span>
@@ -42,6 +42,7 @@
             v-if="item.children && !layoutStore.isSidebarCollapsed" 
             class="menu-arrow"
             :class="{ 'rotate': expandedItems.includes(item.title) }"
+            :size="16"
           />
         </div>
         
@@ -65,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, type Component } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useLayoutStore } from '@/stores/layout'
 
@@ -77,7 +78,7 @@ import IconChevronRight from '@/components/icons/IconChevronRight.vue'
 import IconChevronDown from '@/components/icons/IconChevronDown.vue'
 import IconHome from '@/components/icons/IconHome.vue'
 import IconUsers from '@/components/icons/IconUsers.vue'
-import IconSignout from '@/components/icons/IconSignOut.vue'
+import IconSignOut from '@/components/icons/IconSignOut.vue'
 
 interface MenuItem {
   title: string
@@ -107,6 +108,13 @@ const hasActiveChild = (children: SubMenuItem[]) => {
   return children.some(child => isActive(child.route))
 }
 
+// Mapeamento de ícones para componentes
+const iconMap: Record<string, Component> = {
+  home: IconHome,
+  users: IconUsers,
+  signOut: IconSignOut
+}
+
 const menuItems: MenuItem[] = [
   {
     title: "Dashboard",
@@ -123,7 +131,7 @@ const menuItems: MenuItem[] = [
   },
   {
     title: "Sair",
-    icon: "signout",
+    icon: "signOut",
     route: "/logout"
   }
 ]
@@ -306,7 +314,7 @@ function navigateTo(route: string) {
     background-color: rgba(255,255,255,0.1);
     border-left: 3px solid $primary-color;
     
-    i {
+    .menu-icon {
       color: $primary-color;
     }
     
@@ -328,6 +336,14 @@ function navigateTo(route: string) {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
+  color: #fff;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+  
+  .sidebar-collapsed & {
+    margin-right: 0;
+  }
 }
 
 .menu-text {
@@ -337,7 +353,10 @@ function navigateTo(route: string) {
 
 .menu-arrow {
   transition: transform $transition-speed;
-  font-size: 0.75rem;
+  width: 16px;
+  height: 16px;
+  color: #fff;
+  margin-left: 5px;
   
   &.rotate {
     transform: rotate(180deg);

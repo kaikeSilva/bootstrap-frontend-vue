@@ -39,11 +39,14 @@ import IconDollarSign from '@/components/icons/IconDollarSign.vue'
   
   h1 {
     margin-bottom: 0.5rem;
+    color: #111;
+    font-weight: 700;
   }
   
   p {
-    color: #666;
+    color: #333;
     margin-bottom: 2rem;
+    font-weight: 500;
   }
 }
 
@@ -69,18 +72,21 @@ import IconDollarSign from '@/components/icons/IconDollarSign.vue'
   .stat-icon {
     width: 32px;
     height: 32px;
-    color: var(--primary-color);
+    color: #1565C0; /* Azul mais escuro que o primary-color padrão */
     margin-bottom: 10px;
   }
   
   h3 {
     font-size: 2rem;
     margin: 0.5rem 0;
+    color: #222;
+    font-weight: 600;
   }
   
   p {
     margin: 0;
-    color: #666;
+    color: #333;
+    font-weight: 500;
   }
 }
 </style>
