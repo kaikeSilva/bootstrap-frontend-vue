@@ -74,14 +74,16 @@ const contentClasses = computed(() => ({
 @import '@/styles/mixins';
 
 .app-content {
-  margin-left: $sidebar-width;
-  margin-top: $header-height;
-  min-height: calc(100vh - #{$header-height});
+  position: fixed;
+  top: $header-height;
+  left: $sidebar-width;
+  right: 0;
+  bottom: 0;
   background-color: $background-light;
-  transition: margin-left $transition-speed;
+  transition: left $transition-speed;
   display: flex;
   flex-direction: column;
-  width: calc(100% - $sidebar-width);
+  overflow-y: auto;
   
   @include dark-mode {
     background-color: $background-dark;
@@ -89,23 +91,19 @@ const contentClasses = computed(() => ({
   }
   
   @include mobile-only {
-    margin-left: 0;
-    width: 100%;
+    left: 0;
   }
   
   &.sidebar-collapsed {
-    margin-left: $sidebar-collapsed-width;
-    width: calc(100% - #{$sidebar-collapsed-width});
+    left: $sidebar-collapsed-width;
     
     @include mobile-only {
-      margin-left: 0;
-      width: 100%;
+      left: 0;
     }
   }
   
   &.sidebar-hidden {
-    margin-left: 0;
-    width: 100%;
+    left: 0;
   }
 }
 
@@ -148,6 +146,16 @@ const contentClasses = computed(() => ({
   padding: 2rem 1.5rem;
   flex: 1;
   width: 100%;
+  max-width: 100%;
+  min-width: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  
+  & > * {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 </style>
