@@ -1,116 +1,78 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { computed } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
-import { ConnectionIndicator, WebSocketStatus, WebSocketDebug } from '@/components/WebSocket';
 
 const route = useRoute();
 const isAdminRoute = computed(() => route.path.startsWith('/admin'));
 </script>
 
 <template>
-  <template v-if="!isAdminRoute">
-    <header>
-      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-      <div class="wrapper">
-        <HelloWorld msg="You did it!" />
-        <ConnectionIndicator />
-        <nav>
-          <RouterLink to="/">Home</RouterLink>
-          <RouterLink to="/about">About</RouterLink>
-          <RouterLink to="/admin/dashboard">Admin</RouterLink>
-        </nav>
-      </div>
-    </header>
-
-    <div class="websocket-components-container">
-      <WebSocketStatus />
-      <WebSocketDebug />
-    </div>
-  </template>
-
   <RouterView />
 </template>
 
 <style scoped>
-header {
+.app-header {
   line-height: 1.5;
-  max-height: 100vh;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1rem 0;
 }
 
 nav {
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 1rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
 }
 
 nav a {
   display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+  padding: 0.5rem 1rem;
+  color: #333;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
-nav a:first-of-type {
-  border: 0;
+nav a:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
-.websocket-components-container {
-  margin-top: 20px;
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px dashed #ccc;
-  border-radius: 8px;
+nav a.router-link-active {
+  color: #007bff;
+  font-weight: 500;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+
+
+@media (min-width: 768px) {
+  .app-header {
+    padding: 1rem 2rem;
   }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
+  
+  .wrapper {
     display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
   }
-
-  header .wrapper > * {
-    margin-bottom: 1rem;
+  
+  .app-title {
+    margin: 0;
   }
-
+  
   nav {
-    text-align: left;
-    margin-left: -1rem;
     font-size: 1rem;
-    padding: 1rem 0;
-    margin-top: 0;
-  }
-
-  .websocket-components-container {
-    max-width: 1280px;
-    margin-left: auto;
-    margin-right: auto;
+    justify-content: flex-end;
   }
 }
 </style>

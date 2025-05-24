@@ -110,12 +110,13 @@ const contentClasses = computed(() => ({
 }
 
 .breadcrumbs {
-  padding: 1rem 1.5rem;
+  padding: 0.5rem 1rem; /* Reduced padding to make it more compact */
   background: white;
   border-bottom: 1px solid #e0e0e0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem; /* Reduced gap between items */
+  font-size: 0.75rem; /* Smaller font size */
   
   @include dark-mode {
     background: #1e1e1e;
@@ -126,8 +127,9 @@ const contentClasses = computed(() => ({
 .breadcrumb-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem; /* Reduced gap */
   color: #666;
+  padding: 0.25rem 0.5rem; /* Compact padding */
   
   &.active {
     color: $primary-color;
@@ -140,21 +142,21 @@ const contentClasses = computed(() => ({
 }
 
 .breadcrumb-separator {
-  margin: 0 8px;
+  margin: 0 4px; /* Reduced margin */
   color: #6c757d;
-  width: 16px;
-  height: 16px;
+  width: 12px; /* Smaller size */
+  height: 12px; /* Smaller size */
 }
 
 .breadcrumb-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-  vertical-align: -2px;
+  width: 12px; /* Smaller size */
+  height: 12px; /* Smaller size */
+  margin-right: 2px; /* Reduced margin */
+  vertical-align: -1px;
 }
 
 .content-wrapper {
-  padding: 2rem 1.5rem;
+  padding: 0; /* Removed padding to eliminate space between breadcrumbs and content */
   flex: 1;
   width: 100%;
   max-width: 100%;

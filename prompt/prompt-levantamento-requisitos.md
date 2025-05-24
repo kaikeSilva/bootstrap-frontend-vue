@@ -124,7 +124,7 @@ Após as perguntas, gere uma descrição no seguinte formato:
 
 ### APÓS RECEBER RESPOSTAS (ou usar padrões):
 
-Gere a descrição técnica completa e detalhada que será usada na próxima etapa.
+Gere a descrição técnica completa e detalhada que será usada na próxima etapa. gere a descricao em um artefato.
 
 ---
 

@@ -1,5 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { useAuthStore } from './auth'
+import { useRouter } from 'vue-router'
 
 interface User {
   id: number
@@ -22,9 +24,13 @@ export const useUserStore = defineStore('user', () => {
   const userEmail = computed(() => currentUser.value.email)
   const userAvatar = computed(() => currentUser.value.avatar)
   
-  // Action mockada
-  function logout() {
-    console.log('Logout chamado - não implementado')
+  // Integração com o auth store para logout
+  async function logout() {
+    const authStore = useAuthStore()
+    const router = useRouter()
+    
+    await authStore.logout()
+    router.push('/login')
   }
   
   return {

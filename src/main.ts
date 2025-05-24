@@ -14,6 +14,7 @@ import { useWebSocketStore } from './stores/websocket';
 import { useNotificationStore } from './stores/notifications'; // Import notification store
 import { eventBus } from './utils/events'; // Import event bus
 import { logger } from './utils/logger'; // Import logger
+import { setupInterceptors } from './services/interceptors'; // Import auth interceptors
 
 const app = createApp(App);
 
@@ -22,6 +23,9 @@ const pinia = createPinia();
 app.use(pinia);
 
 app.use(router);
+
+// Setup API interceptors for authentication
+setupInterceptors();
 
 // Initialize WebSocket Service
 const wsConfig = createWebSocketConfig();

@@ -7,13 +7,13 @@
 }
 
 @mixin mobile-only {
-  @media (max-width: $mobile) {
+  @media (max-width: $mobile-max) {
     @content;
   }
 }
 
 @mixin tablet-only {
-  @media (min-width: #{$mobile + 1px}) and (max-width: $tablet) {
+  @media (min-width: #{$mobile-max + 1px}) and (max-width: $tablet) {
     @content;
   }
 }

@@ -122,6 +122,11 @@ const menuItems: MenuItem[] = [
     route: "/admin/dashboard"
   },
   {
+    title: "Clientes",
+    icon: "users",
+    route: "/admin/clientes"
+  },
+  {
     title: "Usuários",
     icon: "users",
     children: [
