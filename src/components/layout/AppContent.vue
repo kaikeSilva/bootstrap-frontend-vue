@@ -7,7 +7,7 @@
           :to="crumb.path"
           class="breadcrumb-item"
         >
-          <i v-if="index === 0" class="fas fa-home"></i>
+          <IconHome v-if="index === 0" class="breadcrumb-icon" />
           {{ crumb.title }}
         </router-link>
         
@@ -15,10 +15,10 @@
           {{ crumb.title }}
         </span>
         
-        <i 
+        <IconChevronRight 
           v-if="index < breadcrumbs.length - 1" 
-          class="fas fa-chevron-right breadcrumb-separator"
-        ></i>
+          class="breadcrumb-separator"
+        />
       </template>
     </div>
     
@@ -32,6 +32,8 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLayoutStore } from '@/stores/layout'
+import IconHome from '@/components/icons/IconHome.vue'
+import IconChevronRight from '@/components/icons/IconChevronRight.vue'
 
 interface Breadcrumb {
   title: string
@@ -138,8 +140,17 @@ const contentClasses = computed(() => ({
 }
 
 .breadcrumb-separator {
-  font-size: 0.75rem;
-  color: #999;
+  margin: 0 8px;
+  color: #6c757d;
+  width: 16px;
+  height: 16px;
+}
+
+.breadcrumb-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: -2px;
 }
 
 .content-wrapper {

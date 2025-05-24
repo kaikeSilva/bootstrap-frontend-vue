@@ -7,7 +7,8 @@
     fill="currentColor"
     :class="className"
   >
-    <path d="M10 3.22l-.61-.6a5.5 5.5 0 0 0-7.666.105 5.5 5.5 0 0 0-.114 7.665L10 18.78l8.39-8.4a5.5 5.5 0 0 0-.114-7.665 5.5 5.5 0 0 0-7.666-.105l-.61.61z" />
+    <!-- SVG path for home icon -->
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
   </svg>
 </template>
 
@@ -20,7 +21,7 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   size: 20,
-  viewBox: '0 0 20 20',
+  viewBox: '0 0 24 24',
   className: ''
 })
 </script>

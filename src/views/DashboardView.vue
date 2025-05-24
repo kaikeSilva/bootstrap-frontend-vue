@@ -5,19 +5,19 @@
     
     <div class="stats-grid">
       <div class="stat-card">
-        <i class="fas fa-users"></i>
+        <IconUsers class="stat-icon" />
         <h3>150</h3>
         <p>Usuários</p>
       </div>
       
       <div class="stat-card">
-        <i class="fas fa-shopping-cart"></i>
+        <IconShoppingCart class="stat-icon" />
         <h3>45</h3>
         <p>Pedidos</p>
       </div>
       
       <div class="stat-card">
-        <i class="fas fa-dollar-sign"></i>
+        <IconDollarSign class="stat-icon" />
         <h3>R$ 12.500</h3>
         <p>Receita</p>
       </div>
@@ -26,7 +26,9 @@
 </template>
 
 <script setup lang="ts">
-// Dashboard view
+import IconUsers from '@/components/icons/IconUsers.vue'
+import IconShoppingCart from '@/components/icons/IconShoppingCart.vue'
+import IconDollarSign from '@/components/icons/IconDollarSign.vue'
 </script>
 
 <style scoped lang="scss">
@@ -53,16 +55,22 @@
 }
 
 .stat-card {
-  background: white;
-  padding: 2rem;
+  background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
+  transition: transform 0.3s ease;
   
-  i {
-    font-size: 2.5rem;
-    color: #1976d2;
-    margin-bottom: 1rem;
+  &:hover {
+    transform: translateY(-5px);
+  }
+  
+  .stat-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--primary-color);
+    margin-bottom: 10px;
   }
   
   h3 {

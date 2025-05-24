@@ -7,7 +7,8 @@
     fill="currentColor"
     :class="className"
   >
-    <path d="M10 3.22l-.61-.6a5.5 5.5 0 0 0-7.666.105 5.5 5.5 0 0 0-.114 7.665L10 18.78l8.39-8.4a5.5 5.5 0 0 0-.114-7.665 5.5 5.5 0 0 0-7.666-.105l-.61.61z" />
+    <!-- SVG path for times/close icon -->
+    <path d="M6.2 6.2a1 1 0 0 1 1.4 0L12 10.6l4.4-4.4a1 1 0 0 1 1.4 1.4L13.4 12l4.4 4.4a1 1 0 0 1-1.4 1.4L12 13.4l-4.4 4.4a1 1 0 0 1-1.4-1.4L10.6 12 6.2 7.6a1 1 0 0 1 0-1.4z"/>
   </svg>
 </template>
 
@@ -20,7 +21,7 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   size: 20,
-  viewBox: '0 0 20 20',
+  viewBox: '0 0 24 24',
   className: ''
 })
 </script>

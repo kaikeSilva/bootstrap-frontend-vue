@@ -386,4 +386,297 @@ Before considering any task complete:
 5. **Research**: The error message usually tells you exactly what's wrong
 6. **Ask specific questions**: "I get error X when doing Y" not "it doesn't work"
 
+## ICON MANAGEMENT - Vue Components + SVG
+
+### CRITICAL ICON WORKFLOW
+**ALWAYS FOLLOW THIS EXACT SEQUENCE:**
+
+1. **Agent Creates Component Structure** - YOU create the Vue component file
+2. **Agent Requests SVG Content** - YOU ask developer for SVG path/content
+3. **Developer Provides SVG** - Developer fills the SVG content
+4. **Agent Validates Component** - YOU ensure proper TypeScript and Vue 3 integration
+
+### 1. ICON COMPONENT CREATION (Agent Responsibility)
+**ALWAYS CREATE ICON COMPONENTS WITH THIS STRUCTURE:**
+
+```vue
+<!-- src/components/icons/IconName.vue -->
+<template>
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    :width="size" 
+    :height="size" 
+    :viewBox="viewBox"
+    fill="currentColor"
+    :class="className"
+  >
+    <!-- SVG_CONTENT_PLACEHOLDER -->
+    <!-- Developer will replace this comment with actual SVG paths -->
+  </svg>
+</template>
+
+<script setup lang="ts">
+interface Props {
+  size?: string | number
+  viewBox?: string
+  className?: string
+}
+
+withDefaults(defineProps<Props>(), {
+  size: 20,
+  viewBox: '0 0 24 24', // Default - adjust based on actual SVG
+  className: ''
+})
+</script>
+```
+
+### 2. ICON REQUEST TEMPLATE (Agent Must Use)
+**WHEN REQUESTING SVG CONTENT, USE THIS EXACT FORMAT:**
+
+```
+I've created the icon component structure at `src/components/icons/IconName.vue`.
+
+Please provide the SVG content for this icon:
+- **Icon Name**: [Describe the icon - e.g., "logout", "settings", "user"]
+- **Expected Use**: [Brief context - e.g., "header logout button", "sidebar navigation"]
+- **Style Preference**: [If relevant - e.g., "outline", "filled", "minimal"]
+
+Replace the `<!-- SVG_CONTENT_PLACEHOLDER -->` comment with:
+- `<path>` elements
+- Any other SVG elements (circle, rect, etc.)
+- Confirm the correct `viewBox` dimensions
+
+The component is ready to receive the SVG content.
+```
+
+### 3. COMMON ICON PATTERNS
+**FOLLOW THESE STANDARDS FOR CONSISTENCY:**
+
+#### Standard Icon Sizes
+```typescript
+// Common size props
+size: 16 | 20 | 24 | 32 | 48
+```
+
+#### ViewBox Standards
+```typescript
+// Most common viewBox patterns
+viewBox: "0 0 24 24"    // Material Design, Lucide
+viewBox: "0 0 20 20"    // Heroicons
+viewBox: "0 0 512 512"  // FontAwesome
+viewBox: "0 0 16 16"    // Bootstrap Icons
+```
+
+#### Icon Component Usage
+```vue
+<template>
+  <!-- Basic usage -->
+  <IconName />
+  
+  <!-- Custom size -->
+  <IconName :size="32" />
+  
+  <!-- Custom styling -->
+  <IconName className="text-blue-500 hover:text-blue-700" />
+  
+  <!-- Different viewBox -->
+  <IconName viewBox="0 0 512 512" />
+</template>
+```
+
+### 4. ICON INTEGRATION VALIDATION
+**AFTER RECEIVING SVG CONTENT, AGENT MUST:**
+
+```bash
+# 1. Check TypeScript compilation
+docker compose exec vue-app npm run type-check
+
+# 2. Verify component renders without errors
+docker compose exec vue-app npm run dev
+# Open browser and check for console errors
+
+# 3. Test icon in different contexts
+```
+
+```vue
+<!-- Test component in parent component -->
+<template>
+  <div>
+    <!-- Test basic rendering -->
+    <IconName />
+    
+    <!-- Test sizing -->
+    <IconName :size="16" />
+    <IconName :size="32" />
+    
+    <!-- Test CSS integration -->
+    <button class="flex items-center gap-2">
+      <IconName />
+      Button Text
+    </button>
+  </div>
+</template>
+```
+
+### 5. ICON DIRECTORY STRUCTURE
+**ORGANIZE ICONS BY CATEGORY:**
+
+```
+src/components/icons/
+├── navigation/
+│   ├── IconHome.vue
+│   ├── IconMenu.vue
+│   └── IconArrow.vue
+├── actions/
+│   ├── IconEdit.vue
+│   ├── IconDelete.vue
+│   └── IconSave.vue
+├── status/
+│   ├── IconSuccess.vue
+│   ├── IconWarning.vue
+│   └── IconError.vue
+└── social/
+    ├── IconGithub.vue
+    ├── IconTwitter.vue
+    └── IconLinkedin.vue
+```
+
+### 6. TROUBLESHOOTING ICON ISSUES
+
+#### Icon Not Appearing - Check These First:
+```vue
+<!-- WRONG: Missing viewBox causes sizing issues -->
+<svg width="20" height="20" fill="currentColor">
+  <path d="..."/>
+</svg>
+
+<!-- CORRECT: Always include viewBox -->
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+  <path d="..."/>
+</svg>
+```
+
+#### Common SVG Problems:
+```vue
+<!-- PROBLEM: Hard-coded colors -->
+<svg fill="#000000">
+  <path d="..." fill="#333333"/>
+</svg>
+
+<!-- SOLUTION: Use currentColor -->
+<svg fill="currentColor">
+  <path d="..."/>
+</svg>
+```
+
+#### Import Issues:
+```vue
+<!-- CORRECT Import -->
+<script setup lang="ts">
+import IconName from '@/components/icons/IconName.vue'
+</script>
+
+<!-- WRONG: Missing .vue extension sometimes causes issues -->
+import IconName from '@/components/icons/IconName'
+```
+
+### 7. ICON COMPONENT BEST PRACTICES
+
+#### Accessibility
+```vue
+<template>
+  <svg 
+    xmlns="http://www.w3.org/2000/svg"
+    :width="size" 
+    :height="size" 
+    :viewBox="viewBox"
+    fill="currentColor"
+    :aria-label="ariaLabel"
+    :role="role"
+  >
+    <path d="..."/>
+  </svg>
+</template>
+
+<script setup lang="ts">
+interface Props {
+  size?: string | number
+  viewBox?: string
+  ariaLabel?: string
+  role?: string
+}
+
+withDefaults(defineProps<Props>(), {
+  size: 20,
+  viewBox: '0 0 24 24',
+  ariaLabel: '',
+  role: 'img'
+})
+</script>
+```
+
+#### Performance Optimization
+```vue
+<!-- For icons used frequently, consider extracting SVG -->
+<template>
+  <svg v-bind="svgProps">
+    <use :href="`#${iconId}`" />
+  </svg>
+</template>
+```
+
+### 8. WHEN TO REQUEST DEVELOPER ACTION
+
+**REQUEST SVG CONTENT WHEN:**
+- ✅ You've created the component structure
+- ✅ You need specific icon designs or paths
+- ✅ You need to match existing design system
+- ✅ You need icons from specific icon libraries
+
+**DON'T REQUEST HELP FOR:**
+- ❌ Creating the Vue component file
+- ❌ Setting up TypeScript interfaces
+- ❌ Basic SVG structure
+- ❌ Component integration and imports
+
+### 9. ICON CREATION CHECKLIST
+
+Before requesting SVG content:
+- [ ] Component file created with proper structure
+- [ ] TypeScript interfaces defined
+- [ ] Props with sensible defaults
+- [ ] Proper file location (`src/components/icons/`)
+- [ ] Import ready in parent component
+- [ ] Clear description of needed icon provided to developer
+
+After receiving SVG content:
+- [ ] SVG paths integrated into component
+- [ ] ViewBox dimensions verified
+- [ ] Component renders without errors
+- [ ] TypeScript compilation passes
+- [ ] Icon displays at different sizes
+- [ ] CSS integration working (currentColor, etc.)
+
+## ICON WORKFLOW EXAMPLE
+
+```bash
+# 1. Agent creates component
+docker compose exec vue-app touch src/components/icons/IconLogout.vue
+
+# 2. Agent writes component structure (see template above)
+
+# 3. Agent requests SVG: 
+# "I need a logout/sign-out icon for the header. Please provide SVG paths."
+
+# 4. Developer provides SVG content
+
+# 5. Agent validates:
+docker compose exec vue-app npm run type-check
+docker compose exec vue-app npm run dev
+
+# 6. Agent tests integration in parent component
+```
+
+This approach ensures consistent, maintainable, and properly typed icon components while clearly dividing responsibilities between agent (structure/integration) and developer (design/SVG content).
+
 Remember: The goal is working, maintainable code, not perfection. Start simple, iterate, and validate frequently.

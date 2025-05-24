@@ -1,7 +1,7 @@
 <template>
   <aside class="app-sidebar" :class="sidebarClasses">
     <div class="sidebar-header">
-      <i class="fas fa-cube logo"></i>
+      <IconCube class="logo" />
       <span class="brand-name" v-if="!layoutStore.isSidebarCollapsed">Admin Panel</span>
       
       <!-- Botão para fechar o menu no mobile -->
@@ -10,7 +10,7 @@
         @click="layoutStore.setSidebarVisible(false)"
         aria-label="Fechar menu"
       >
-        <i class="fas fa-times"></i>
+        <IconTimes />
       </button>
       
       <!-- Botão para colapsar o menu no desktop -->
@@ -19,7 +19,8 @@
         @click="layoutStore.toggleSidebarCollapse()"
         aria-label="Colapsar menu"
       >
-        <i class="fas" :class="layoutStore.isSidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+        <IconChevronLeft v-if="!layoutStore.isSidebarCollapsed" />
+        <IconChevronRight v-else />
       </button>
     </div>
     
@@ -33,15 +34,15 @@
           }"
           @click="handleMenuClick(item)"
         >
-          <i :class="item.icon"></i>
+          <component :is="`Icon${item.icon.charAt(0).toUpperCase() + item.icon.slice(1)}`" class="menu-icon" />
           <span class="menu-text" v-if="!layoutStore.isSidebarCollapsed">
             {{ item.title }}
           </span>
-          <i 
+          <IconChevronDown 
             v-if="item.children && !layoutStore.isSidebarCollapsed" 
-            class="fas fa-chevron-down menu-arrow"
+            class="menu-arrow"
             :class="{ 'rotate': expandedItems.includes(item.title) }"
-          ></i>
+          />
         </div>
         
         <div 
@@ -67,6 +68,16 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useLayoutStore } from '@/stores/layout'
+
+// Importando os componentes de ícones
+import IconCube from '@/components/icons/IconCube.vue'
+import IconTimes from '@/components/icons/IconTimes.vue'
+import IconChevronLeft from '@/components/icons/IconChevronLeft.vue'
+import IconChevronRight from '@/components/icons/IconChevronRight.vue'
+import IconChevronDown from '@/components/icons/IconChevronDown.vue'
+import IconHome from '@/components/icons/IconHome.vue'
+import IconUsers from '@/components/icons/IconUsers.vue'
+import IconSignout from '@/components/icons/IconSignOut.vue'
 
 interface MenuItem {
   title: string
@@ -99,16 +110,21 @@ const hasActiveChild = (children: SubMenuItem[]) => {
 const menuItems: MenuItem[] = [
   {
     title: "Dashboard",
-    icon: "fas fa-home",
+    icon: "home",
     route: "/admin/dashboard"
   },
   {
     title: "Usuários",
-    icon: "fas fa-users",
+    icon: "users",
     children: [
       { title: "Listar Usuários", route: "/admin/usuarios" },
       { title: "Novo Usuário", route: "/admin/usuarios/novo" }
     ]
+  },
+  {
+    title: "Sair",
+    icon: "signout",
+    route: "/logout"
   }
 ]
 
@@ -253,7 +269,8 @@ function navigateTo(route: string) {
 }
 
 .logo {
-  font-size: 32px;
+  width: 32px;
+  height: 32px;
   color: #fff;
   flex-shrink: 0;
 }
@@ -307,9 +324,9 @@ function navigateTo(route: string) {
   }
 }
 
-.menu-item i {
+.menu-icon {
   width: 24px;
-  font-size: 1.25rem;
+  height: 24px;
   flex-shrink: 0;
 }
 

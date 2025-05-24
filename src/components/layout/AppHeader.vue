@@ -1,7 +1,7 @@
 <template>
   <header class="app-header">
     <button class="menu-toggle" @click="handleMenuToggle">
-      <i class="fas fa-bars"></i>
+      <IconBars />
     </button>
     
     <div class="header-title">
@@ -10,7 +10,8 @@
     
     <div class="header-actions">
       <button class="theme-toggle" @click="layoutStore.toggleDarkMode()">
-        <i :class="layoutStore.isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+        <IconSun v-if="layoutStore.isDarkMode" />
+        <IconMoon v-else />
       </button>
       
       <span class="user-name">{{ userStore.userName }}</span>
@@ -21,7 +22,7 @@
       >
       
       <button class="logout-btn" @click="userStore.logout()">
-        <i class="fas fa-sign-out-alt"></i>
+        <IconSignOut />
       </button>
     </div>
   </header>
@@ -30,7 +31,11 @@
 <script setup lang="ts">
 import { useLayoutStore } from '@/stores/layout'
 import { useUserStore } from '@/stores/user'
-
+import IconBars from '@/components/icons/IconBars.vue'
+import IconSun from '@/components/icons/IconSun.vue'
+import IconMoon from '@/components/icons/IconMoon.vue'
+import IconSignOut from '@/components/icons/IconSignOut.vue'
+import IconSupport from '@/components/icons/IconSupport.vue'
 const layoutStore = useLayoutStore()
 const userStore = useUserStore()
 
