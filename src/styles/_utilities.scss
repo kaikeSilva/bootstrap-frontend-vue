@@ -1,0 +1,38 @@
+@import './variables';
+@import './mixins';
+
+.flex-center {
+  @include center-flex;
+}
+
+.text-muted {
+  color: #666;
+  
+  @include dark-mode {
+    color: #999;
+  }
+}
+
+.hover-highlight {
+  transition: background-color $transition-speed;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    
+    @include dark-mode {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+}
+
+.transition-all {
+  transition: all $transition-speed ease;
+}
+
+.shadow-sm {
+  box-shadow: $shadow-sm;
+}
+
+.shadow-md {
+  box-shadow: $shadow-md;
+}

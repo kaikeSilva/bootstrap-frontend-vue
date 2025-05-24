@@ -1,0 +1,46 @@
+@import './variables';
+
+@mixin dark-mode {
+  .dark-mode & {
+    @content;
+  }
+}
+
+@mixin mobile-only {
+  @media (max-width: $mobile) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: #{$mobile + 1px}) and (max-width: $tablet) {
+    @content;
+  }
+}
+
+@mixin desktop-only {
+  @media (min-width: #{$tablet + 1px}) {
+    @content;
+  }
+}
+
+@mixin center-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin scrollbar-custom {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $background-light;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+}

@@ -8,6 +8,7 @@ COPY package*.json ./
 
 # Instala dependências
 RUN npm install
+RUN npm install -D sass
 
 # Copia código fonte
 COPY . .
