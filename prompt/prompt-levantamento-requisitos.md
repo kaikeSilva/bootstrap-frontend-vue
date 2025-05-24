@@ -130,8 +130,7 @@ Gere a descrição técnica completa e detalhada que será usada na próxima eta
 
 ## [MINHA DESCRIÇÃO SIMPLES DO QUE DEVE SER FEITO]:
 
-[Aqui o usuário coloca sua descrição inicial vaga]
-
+Preciso criar uma base para a construcao de um painel administrativo moderno e responsivo.
 ---
 
 # Como Usar:
