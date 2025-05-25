@@ -47,7 +47,7 @@ const layoutStore = useLayoutStore()
 
 const breadcrumbs = computed<Breadcrumb[]>(() => {
   const crumbs: Breadcrumb[] = [
-    { title: 'Home', path: '/dashboard' }
+    { title: 'Home', path: '/' }
   ]
   
   if (route.meta.title) {

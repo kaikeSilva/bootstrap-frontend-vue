@@ -119,11 +119,6 @@ const iconMap: Record<string, Component> = {
 
 const menuItems: MenuItem[] = [
   {
-    title: "Dashboard",
-    icon: "home",
-    route: "/dashboard"
-  },
-  {
     title: "Clientes",
     icon: "users",
     route: "/clientes"

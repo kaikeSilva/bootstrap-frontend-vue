@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import DashboardView from '@/views/DashboardView.vue'
 import ClientsView from '@/views/clients/ClientsView.vue'
 import LoginView from '@/views/LoginView.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -21,10 +19,8 @@ const router = createRouter({
       meta: { requiresAuth: true },
       children: [
         {
-          path: 'dashboard',
-          name: 'dashboard',
-          component: DashboardView,
-          meta: { title: 'Dashboard' }
+          path: '',
+          redirect: '/clientes'
         },
         {
           path: 'clientes',
