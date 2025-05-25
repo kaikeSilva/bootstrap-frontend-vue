@@ -39,6 +39,15 @@
           <IconFilter :size="16" />
           <span class="filter-button-text">Filtros</span>
         </button>
+        
+        <button 
+          class="filter-button filter-button-add" 
+          @click="$emit('add-client')"
+          title="Adicionar novo cliente"
+        >
+          <IconAdd :size="16" />
+          <span class="filter-button-text">Adicionar</span>
+        </button>
       </div>
     </div>
     
@@ -120,6 +129,7 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue'
 import IconFilter from '@/components/icons/IconFilter.vue'
+import IconAdd from '@/components/icons/IconAdd.vue'
 
 interface FilterState {
   busca: string;
@@ -135,6 +145,7 @@ interface FilterState {
 const emit = defineEmits<{
   (e: 'filter', filters: Record<string, string>): void;
   (e: 'clear'): void;
+  (e: 'add-client'): void;
 }>()
 
 const showAdvancedFilters = ref(false)
@@ -203,10 +214,11 @@ const clearFilters = () => {
 .filter-right {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .filter-group {
-  flex: 1;
+  flex: 0.7;
   min-width: 0;
 }
 
@@ -281,6 +293,16 @@ const clearFilters = () => {
 .filter-button-advanced.active {
   background-color: #f3f4f6;
   border-color: #9ca3af;
+}
+
+.filter-button-add {
+  border: none;
+  background-color: #10b981;
+  color: white;
+}
+
+.filter-button-add:hover {
+  background-color: #059669;
 }
 
 .filter-button-text {

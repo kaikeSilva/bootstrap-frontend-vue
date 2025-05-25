@@ -5,6 +5,7 @@
         <ClientsFilter 
           @filter="handleFilter"
           @clear="handleClearFilter"
+          @add-client="handleAddClient"
         />
       </div>
       
@@ -30,8 +31,11 @@
             total: total,
             links: paginationLinks
           }"
+          :sort-by="sortBy"
+          :sort-direction="sortDirection"
           @page-change="handlePageChange"
           @per-page-change="handlePerPageChange"
+          @sort="handleSort"
         />
         <ClientsCards 
           :clients="clients"
@@ -53,6 +57,7 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 import { useClientsStore } from '@/stores/clientsStore'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
@@ -61,6 +66,7 @@ import ClientsCards from '@/components/clients/ClientsCards.vue'
 import ClientsFilter from '@/components/clients/ClientsFilter.vue'
 import Pagination from '@/components/common/Pagination.vue'
 
+const router = useRouter()
 const clientsStore = useClientsStore()
 const { 
   clients, 
@@ -71,7 +77,9 @@ const {
   perPage, 
   total,
   paginationLinks,
-  activeFilters 
+  activeFilters,
+  sortBy,
+  sortDirection 
 } = storeToRefs(clientsStore)
 
 // Calculate pagination info
@@ -107,6 +115,30 @@ const handleFilter = (filters: Record<string, string>) => {
 const handleClearFilter = () => {
   // Limpar filtros e recarregar dados
   clientsStore.clearFilters()
+}
+
+const handleAddClient = () => {
+  // Navegar para a página de cadastro de cliente
+  router.push({ name: 'new-client' })
+}
+
+const handleSort = async (field: string) => {
+  // Se clicar no mesmo campo, inverte a direção
+  if (field === sortBy.value) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    // Se clicar em um novo campo, define como ascendente
+    sortBy.value = field
+    sortDirection.value = 'asc'
+  }
+
+  // Recarregar clientes com a nova ordenação
+  await clientsStore.fetchClients(
+    currentPage.value, 
+    perPage.value, 
+    Object.keys(activeFilters).length > 0 ? { ...activeFilters } : undefined,
+    { sortBy: sortBy.value, direction: sortDirection.value }
+  )
 }
 
 onMounted(() => {

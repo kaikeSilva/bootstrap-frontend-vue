@@ -5,6 +5,8 @@ interface GetClientsParams {
   page?: number;
   per_page?: number;
   filter?: Record<string, string>;
+  sort_by?: string;
+  direction?: 'asc' | 'desc';
 }
 
 export const clientsService = {
@@ -17,6 +19,19 @@ export const clientsService = {
       return response.data
     } catch (error) {
       console.error('Error fetching clients:', error)
+      throw error
+    }
+  },
+  
+  async createClient(clientData: Partial<Client>): Promise<Client> {
+    try {
+      console.log('Creating new client:', clientData)
+      const response = await api.post('/clients', clientData)
+      
+      console.log('Client created:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error creating client:', error)
       throw error
     }
   }

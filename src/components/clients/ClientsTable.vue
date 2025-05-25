@@ -17,12 +17,60 @@
       <table class="clients-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Telefone</th>
-            <th>Endereço</th>
-            <th>Data de Cadastro</th>
+            <th @click="handleSort('id')" class="sortable-header">
+              ID
+              <IconSort 
+                v-if="props.sortBy === 'id'" 
+                :type="props.sortDirection" 
+                size="14" 
+                class="sort-icon"
+              />
+            </th>
+            <th @click="handleSort('name')" class="sortable-header">
+              Nome
+              <IconSort 
+                v-if="props.sortBy === 'name'" 
+                :type="props.sortDirection" 
+                size="14" 
+                class="sort-icon"
+              />
+            </th>
+            <th @click="handleSort('email')" class="sortable-header">
+              Email
+              <IconSort 
+                v-if="props.sortBy === 'email'" 
+                :type="props.sortDirection" 
+                size="14" 
+                class="sort-icon"
+              />
+            </th>
+            <th @click="handleSort('phone')" class="sortable-header">
+              Telefone
+              <IconSort 
+                v-if="props.sortBy === 'phone'" 
+                :type="props.sortDirection" 
+                size="14" 
+                class="sort-icon"
+              />
+            </th>
+            <th @click="handleSort('address')" class="sortable-header">
+              Endereço
+              <IconSort 
+                v-if="props.sortBy === 'address'" 
+                :type="props.sortDirection" 
+                size="14" 
+                class="sort-icon"
+              />
+            </th>
+            <th @click="handleSort('created_at')" class="sortable-header">
+              Data de Cadastro
+              <IconSort 
+                v-if="props.sortBy === 'created_at'" 
+                :type="props.sortDirection" 
+                size="14" 
+                class="sort-icon"
+              />
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -42,8 +90,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useClientsStore } from '@/stores/clientsStore'
 import type { Client, PaginationLinks } from '@/types/client.types'
 import Pagination from '@/components/common/Pagination.vue'
+import IconSort from '@/components/icons/IconSort.vue'
 
 interface PaginationInfo {
   currentPage: number;
@@ -56,6 +107,8 @@ interface PaginationInfo {
 interface Props {
   clients: Client[];
   pagination?: PaginationInfo | null;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 const props = defineProps<Props>()
@@ -63,7 +116,18 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   (e: 'page-change', page: number): void;
   (e: 'per-page-change', perPage: number): void;
+  (e: 'sort', field: string): void;
 }>()
+
+// Receber os valores de ordenação como props em vez de acessar o store diretamente
+interface SortProps {
+  sortBy: string;
+  sortDirection: 'asc' | 'desc';
+}
+
+const handleSort = (field: string) => {
+  emit('sort', field)
+}
 
 // Calculate pagination info for display
 const paginationFrom = computed(() => {
@@ -130,6 +194,25 @@ const formatDate = (dateString: string): string => {
   background-color: #f9fafb;
   font-weight: 600;
   color: #374151;
+}
+
+.sortable-header {
+  cursor: pointer;
+  position: relative;
+  padding-right: 1.5rem;
+  user-select: none;
+}
+
+.sortable-header:hover {
+  background-color: #f3f4f6;
+}
+
+.sort-icon {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
 }
 
 .clients-table td {
