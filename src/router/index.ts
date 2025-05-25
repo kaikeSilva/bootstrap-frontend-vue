@@ -39,6 +39,15 @@ const router = createRouter({
           meta: { title: 'Novo Cliente' }
         },
         {
+          path: 'clientes/:id/editar',
+          name: 'edit-client',
+          component: () => import('../views/ClientFormView.vue'),
+          meta: { 
+            title: 'Editar Cliente',
+            parent: 'clients'
+          }
+        },
+        {
           path: 'clientes/:id',
           name: 'client-details',
           component: () => import('../views/ClientDetailsView.vue'),

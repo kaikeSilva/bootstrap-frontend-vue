@@ -11,6 +11,13 @@
         @page-change="$emit('page-change', $event)"
         @per-page-change="$emit('per-page-change', $event)"
       />
+      <Pagination
+        v-if="pagination?.links"
+        :links="pagination.links"
+        :meta="pagination"
+        @page-change="$emit('page-change', $event)"
+        @per-page-change="$emit('per-page-change', $event)"
+      />
     </div>
     
     <div class="client-card" v-for="client in clients" :key="client.id">
@@ -27,19 +34,19 @@
             <IconEllipsis size="18" />
           </button>
           <div v-if="activeMenu === client.id" class="actions-dropdown">
-            <div class="dropdown-item" @click="handleView(client.id)">
-              <IconView size="16" />
-              <span>Visualizar</span>
+              <div class="dropdown-item" @click="handleView(client.id)">
+                <IconView />
+                <span>Visualizar</span>
+              </div>
+              <div class="dropdown-item" @click="handleEdit(client.id)">
+                <IconEdit />
+                <span>Editar</span>
+              </div>
+              <div class="dropdown-item delete" @click="handleDelete(client.id)">
+                <IconDelete />
+                <span>Excluir</span>
+              </div>
             </div>
-            <div class="dropdown-item" @click="handleEdit(client.id)">
-              <IconEdit size="16" />
-              <span>Editar</span>
-            </div>
-            <div class="dropdown-item delete" @click="handleDelete(client.id)">
-              <IconDelete size="16" />
-              <span>Excluir</span>
-            </div>
-          </div>
         </div>
       </div>
       
@@ -60,6 +67,17 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modal de confirmação de exclusão -->
+    <ConfirmationModal
+      :show="showDeleteModal"
+      title="Excluir Cliente"
+      :message="`Tem certeza que deseja excluir o cliente '${clientToDelete?.name}'? Esta ação não pode ser desfeita.`"
+      confirmText="Excluir"
+      cancelText="Cancelar"
+      @close="showDeleteModal = false"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
@@ -67,6 +85,9 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Client, PaginationLinks } from '@/types/client.types'
+import { clientsService } from '@/services/clientsService'
+import { useNotificationStore } from '@/stores/notificationStore'
+import ConfirmationModal from '@/components/common/ConfirmationModal.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import IconEllipsis from '@/components/icons/IconEllipsis.vue'
 import IconView from '@/components/icons/IconView.vue'
@@ -109,9 +130,13 @@ const paginationTo = computed(() => {
   )
 })
 
+const notificationStore = useNotificationStore()
+const showDeleteModal = ref(false)
+const clientToDelete = ref<Client | null>(null)
+const isDeleting = ref(false)
+
 // Controle do menu de ações
 const activeMenu = ref<number | null>(null)
-
 const toggleMenu = (clientId: number) => {
   if (activeMenu.value === clientId) {
     activeMenu.value = null
@@ -146,21 +171,67 @@ const handleView = (clientId: number) => {
 }
 
 const handleEdit = (clientId: number) => {
-  console.log(`Editar cliente ${clientId}`)
+  router.push({ name: 'edit-client', params: { id: clientId.toString() } })
   activeMenu.value = null
 }
 
 const handleDelete = (clientId: number) => {
-  console.log(`Excluir cliente ${clientId}`)
+  // Encontrar o cliente a ser excluído
+  const client = props.clients.find(c => c.id === clientId)
+  if (client) {
+    clientToDelete.value = client
+    showDeleteModal.value = true
+  }
   activeMenu.value = null
 }
 
+const confirmDelete = async () => {
+  if (!clientToDelete.value?.id) return
+  
+  try {
+    isDeleting.value = true
+    
+    // Chamar a API para excluir o cliente
+    await clientsService.deleteClient(clientToDelete.value.id)
+    
+    // Fechar o modal
+    showDeleteModal.value = false
+    
+    // Mostrar notificação de sucesso
+    notificationStore.addNotification(
+      `Cliente ${clientToDelete.value.name} excluído com sucesso!`,
+      'success',
+      5000
+    )
+    
+    // Emitir evento para atualizar a lista de clientes
+    emit('page-change', props.pagination?.currentPage || 1)
+  } catch (err) {
+    console.error('Erro ao excluir cliente:', err)
+    
+    // Mostrar notificação de erro
+    notificationStore.addNotification(
+      'Ocorreu um erro ao excluir o cliente. Tente novamente.',
+      'error',
+      5000
+    )
+    
+    // Fechar o modal
+    showDeleteModal.value = false
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+
+
 const formatDate = (dateString: string): string => {
+  if (!dateString) return '-'
   const date = new Date(dateString)
   return new Intl.DateTimeFormat('pt-BR', {
-    year: 'numeric',
-    month: '2-digit',
     day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   }).format(date)
@@ -169,8 +240,6 @@ const formatDate = (dateString: string): string => {
 
 <style scoped>
 .cards-container {
-  display: grid;
-  gap: 1rem;
   padding: 0;
 }
 

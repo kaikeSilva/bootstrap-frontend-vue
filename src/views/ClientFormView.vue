@@ -2,8 +2,10 @@
   <div class="client-form-view">
     <div class="form-container">
       <div class="form-header">
-        <h1 class="form-title">Novo Cliente</h1>
-        <p class="form-description">Preencha os dados para cadastrar um novo cliente</p>
+        <h1 class="form-title">{{ isEditMode ? 'Editar Cliente' : 'Novo Cliente' }}</h1>
+        <p class="form-description">
+          {{ isEditMode ? 'Edite os dados do cliente' : 'Preencha os dados para cadastrar um novo cliente' }}
+        </p>
       </div>
       
       <form @submit.prevent="handleSubmit" class="client-form">
@@ -75,8 +77,8 @@
             class="form-button submit-button"
             :disabled="loading"
           >
-            <span v-if="loading">Salvando...</span>
-            <span v-else>Salvar</span>
+            <span v-if="loading">{{ isEditMode ? 'Atualizando...' : 'Salvando...' }}</span>
+            <span v-else>{{ isEditMode ? 'Atualizar' : 'Salvar' }}</span>
           </button>
         </div>
       </form>
@@ -85,10 +87,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { clientsService } from '@/services/clientsService'
 import { vMask } from '@/directives/mask'
+import type { Client } from '@/types/client.types'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 interface ClientForm {
   name: string;
@@ -103,7 +107,14 @@ interface FormErrors {
 }
 
 const router = useRouter()
+const route = useRoute()
+const notificationStore = useNotificationStore()
 const loading = ref(false)
+const loadingClient = ref(false)
+const clientId = ref<number | null>(null)
+
+// Determinar se estamos no modo de edição ou criação
+const isEditMode = computed(() => !!clientId.value)
 
 const form = reactive<ClientForm>({
   name: '',
@@ -113,6 +124,40 @@ const form = reactive<ClientForm>({
 })
 
 const errors = reactive<FormErrors>({})
+
+// Carregar dados do cliente se estiver no modo de edição
+onMounted(async () => {
+  // Verificar se temos um ID na rota
+  if (route.params.id) {
+    const id = parseInt(route.params.id as string)
+    if (!isNaN(id)) {
+      clientId.value = id
+      await loadClientData(id)
+    }
+  }
+})
+
+// Função para carregar os dados do cliente
+const loadClientData = async (id: number) => {
+  loadingClient.value = true
+  
+  try {
+    const client = await clientsService.getClientById(id)
+    
+    // Preencher o formulário com os dados do cliente
+    form.name = client.name
+    form.email = client.email || ''
+    form.phone = client.phone || ''
+    form.address = client.address || ''
+    
+  } catch (error) {
+    console.error('Erro ao carregar dados do cliente:', error)
+    alert('Não foi possível carregar os dados do cliente. Tente novamente.')
+    router.push({ name: 'clients' })
+  } finally {
+    loadingClient.value = false
+  }
+}
 
 const validateForm = (): boolean => {
   let isValid = true
@@ -140,14 +185,35 @@ const handleSubmit = async () => {
   loading.value = true
   
   try {
-    // Chamar a API para criar o cliente
-    await clientsService.createClient(form)
+    if (isEditMode.value && clientId.value) {
+      // Atualizar cliente existente
+      await clientsService.updateClient(clientId.value, form)
+      notificationStore.addNotification(
+        'Cliente atualizado com sucesso!',
+        'success',
+        5000
+      )
+    } else {
+      // Criar novo cliente
+      await clientsService.createClient(form)
+      notificationStore.addNotification(
+        'Cliente criado com sucesso!',
+        'success',
+        5000
+      )
+    }
     
     // Redirecionar para a lista de clientes
     router.push({ name: 'clients' })
   } catch (error) {
-    console.error('Erro ao criar cliente:', error)
-    alert('Ocorreu um erro ao criar o cliente. Tente novamente.')
+    console.error(`Erro ao ${isEditMode.value ? 'atualizar' : 'criar'} cliente:`, error)
+    // Exibir mensagem de erro no formulário em vez de um alert
+    errors.name = `Ocorreu um erro ao ${isEditMode.value ? 'atualizar' : 'criar'} o cliente. Tente novamente.`
+    notificationStore.addNotification(
+      `Ocorreu um erro ao ${isEditMode.value ? 'atualizar' : 'criar'} o cliente.`,
+      'error',
+      5000
+    )
   } finally {
     loading.value = false
   }

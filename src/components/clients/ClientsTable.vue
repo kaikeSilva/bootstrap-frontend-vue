@@ -72,41 +72,58 @@
             <td>{{ client.email }}</td>
             <td>{{ client.phone || '-' }}</td>
             <td>{{ client.address || '-' }}</td>
-            <td class="actions-cell">
+            <td class="actions-cell" 
+            :style="{ position: clients.length === clients.indexOf(client) + 1 ? 'absolute' : '', borderBottom: clients.length === clients.indexOf(client) + 1 ? 'none' : '' }">
               <div class="actions-menu">
                 <button class="actions-button" @click="toggleMenu(client.id)">
                   <IconEllipsis size="18" />
                 </button>
                 <div v-if="activeMenu === client.id" class="actions-dropdown">
-                  <div class="dropdown-item" @click="handleView(client.id)">
-                    <IconView size="16" />
-                    <span>Visualizar</span>
+                    <div class="dropdown-item" @click="handleView(client.id)">
+                      <IconView />
+                      <span>Visualizar</span>
+                    </div>
+                    <div class="dropdown-item" @click="handleEdit(client.id)">
+                      <IconEdit />
+                      <span>Editar</span>
+                    </div>
+                    <div class="dropdown-item delete" @click="handleDelete(client.id)">
+                      <IconDelete />
+                      <span>Excluir</span>
+                    </div>
                   </div>
-                  <div class="dropdown-item" @click="handleEdit(client.id)">
-                    <IconEdit size="16" />
-                    <span>Editar</span>
-                  </div>
-                  <div class="dropdown-item delete" @click="handleDelete(client.id)">
-                    <IconDelete size="16" />
-                    <span>Excluir</span>
-                  </div>
-                </div>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+      <!-- Div extra para garantir espaço para o menu de ações -->
+      <div class="table-spacer"></div>
     </div>
+    
+    <!-- Modal de confirmação de exclusão -->
+    <ConfirmationModal
+      :show="showDeleteModal"
+      title="Excluir Cliente"
+      :message="`Tem certeza que deseja excluir o cliente '${clientToDelete?.name}'? Esta ação não pode ser desfeita.`"
+      confirmText="Excluir"
+      cancelText="Cancelar"
+      @close="showDeleteModal = false"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useClientsStore } from '@/stores/clientsStore'
+import { clientsService } from '@/services/clientsService'
+import { useNotificationStore } from '@/stores/notificationStore'
 import type { Client, PaginationLinks } from '@/types/client.types'
 import Pagination from '@/components/common/Pagination.vue'
+import ConfirmationModal from '@/components/common/ConfirmationModal.vue'
 import IconSort from '@/components/icons/IconSort.vue'
 import IconEllipsis from '@/components/icons/IconEllipsis.vue'
 import IconView from '@/components/icons/IconView.vue'
@@ -114,6 +131,10 @@ import IconEdit from '@/components/icons/IconEdit.vue'
 import IconDelete from '@/components/icons/IconDelete.vue'
 
 const router = useRouter()
+const notificationStore = useNotificationStore()
+const showDeleteModal = ref(false)
+const clientToDelete = ref<Client | null>(null)
+const isDeleting = ref(false)
 
 interface PaginationInfo {
   currentPage: number;
@@ -136,17 +157,11 @@ const emit = defineEmits<{
   (e: 'page-change', page: number): void;
   (e: 'per-page-change', perPage: number): void;
   (e: 'sort', field: string): void;
+  (e: 'delete', clientId: number): void;
 }>()
-
-// Receber os valores de ordenação como props em vez de acessar o store diretamente
-interface SortProps {
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
-}
 
 // Controle do menu de ações
 const activeMenu = ref<number | null>(null)
-
 const toggleMenu = (clientId: number) => {
   if (activeMenu.value === clientId) {
     activeMenu.value = null
@@ -181,18 +196,63 @@ const handleView = (clientId: number) => {
 }
 
 const handleEdit = (clientId: number) => {
-  console.log(`Editar cliente ${clientId}`)
+  router.push({ name: 'edit-client', params: { id: clientId.toString() } })
   activeMenu.value = null
 }
 
 const handleDelete = (clientId: number) => {
-  console.log(`Excluir cliente ${clientId}`)
+  // Encontrar o cliente a ser excluído
+  const client = props.clients.find(c => c.id === clientId)
+  if (client) {
+    clientToDelete.value = client
+    showDeleteModal.value = true
+  }
   activeMenu.value = null
+}
+
+const confirmDelete = async () => {
+  if (!clientToDelete.value?.id) return
+  
+  try {
+    isDeleting.value = true
+    
+    // Chamar a API para excluir o cliente
+    await clientsService.deleteClient(clientToDelete.value.id)
+    
+    // Fechar o modal
+    showDeleteModal.value = false
+    
+    // Mostrar notificação de sucesso
+    notificationStore.addNotification(
+      `Cliente ${clientToDelete.value.name} excluído com sucesso!`,
+      'success',
+      5000
+    )
+    
+    // Emitir evento para atualizar a lista de clientes
+    emit('page-change', props.pagination?.currentPage || 1)
+  } catch (err) {
+    console.error('Erro ao excluir cliente:', err)
+    
+    // Mostrar notificação de erro
+    notificationStore.addNotification(
+      'Ocorreu um erro ao excluir o cliente. Tente novamente.',
+      'error',
+      5000
+    )
+    
+    // Fechar o modal
+    showDeleteModal.value = false
+  } finally {
+    isDeleting.value = false
+  }
 }
 
 const handleSort = (field: string) => {
   emit('sort', field)
 }
+
+
 
 // Calculate pagination info for display
 const paginationFrom = computed(() => {
@@ -237,6 +297,13 @@ const formatDate = (dateString: string): string => {
   width: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* Elemento para garantir espaço extra após a tabela */
+.table-spacer {
+  height: 150px;
+  width: 100%;
+  display: block;
 }
 
 .clients-table {
@@ -316,13 +383,14 @@ const formatDate = (dateString: string): string => {
 
 /* Estilos para a coluna de ações */
 .actions-header {
-  width: 80px;
+  width: 100px;
   text-align: center;
 }
 
 .actions-cell {
   text-align: center;
   position: relative;
+  overflow: visible;
 }
 
 .actions-menu {
@@ -348,14 +416,15 @@ const formatDate = (dateString: string): string => {
 .actions-dropdown {
   position: absolute;
   right: 0;
+  /* Alterar o posicionamento para que o menu abra para baixo */
   top: 100%;
   background-color: white;
   border-radius: 4px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   min-width: 150px;
-  z-index: 10;
+  z-index: 1000; /* Aumentar o z-index para garantir que o menu fique acima de outros elementos */
   margin-top: 5px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid #e5e7eb;
 }
 

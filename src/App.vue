@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { computed } from 'vue'
+import GlobalNotifications from '@/components/common/GlobalNotifications.vue'
 
 const route = useRoute();
 const isAdminRoute = computed(() => route.path.startsWith('/admin'));
 </script>
 
 <template>
+  <GlobalNotifications />
   <RouterView />
 </template>
 

@@ -51,5 +51,35 @@ export const clientsService = {
       console.error('Error creating client:', error)
       throw error
     }
+  },
+  
+  async updateClient(id: number, clientData: Partial<Client>): Promise<Client> {
+    try {
+      console.log(`Updating client with ID ${id}:`, clientData)
+      const response = await api.put(`/clients/${id}`, clientData)
+      
+      // A API retorna os dados dentro de um objeto 'data'
+      if (response.data && response.data.data) {
+        console.log('Client updated:', response.data.data)
+        return response.data.data
+      }
+      
+      console.log('Client updated:', response.data)
+      return response.data
+    } catch (error) {
+      console.error(`Error updating client with ID ${id}:`, error)
+      throw error
+    }
+  },
+  
+  async deleteClient(id: number): Promise<void> {
+    try {
+      console.log(`Deleting client with ID ${id}`)
+      await api.delete(`/clients/${id}`)
+      console.log(`Client with ID ${id} deleted successfully`)
+    } catch (error) {
+      console.error(`Error deleting client with ID ${id}:`, error)
+      throw error
+    }
   }
 }
