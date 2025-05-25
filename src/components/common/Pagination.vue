@@ -271,26 +271,70 @@ const visiblePageNumbers = computed(() => {
 
 @media (max-width: 768px) {
   .pagination-container {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .pagination-left {
+    order: 1;
+    width: 100%;
+    margin-bottom: 0.25rem;
   }
   
   .pagination-right {
+    order: 2;
     width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     gap: 0.5rem;
   }
   
   .pagination-controls {
-    width: 100%;
-    justify-content: center;
+    flex: 1;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    /* Esconde a barra de rolagem mas mantém a funcionalidade */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  
+  .pagination-controls::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
   }
   
   .pagination-per-page {
-    width: 100%;
+    flex-shrink: 0;
     justify-content: flex-end;
+  }
+  
+  /* Reduzir ainda mais o tamanho dos botões em telas muito pequenas */
+  @media (max-width: 480px) {
+    .pagination-button {
+      min-width: 1.5rem;
+      height: 1.5rem;
+      padding: 0 0.25rem;
+      font-size: 0.7rem;
+    }
+    
+    .pagination-ellipsis {
+      min-width: 1.5rem;
+      height: 1.5rem;
+      font-size: 0.7rem;
+    }
+    
+    .per-page-select {
+      height: 1.5rem;
+      padding: 0 0.25rem;
+      font-size: 0.7rem;
+    }
+    
+    .pagination-per-page label {
+      font-size: 0.7rem;
+    }
   }
 }
 </style>

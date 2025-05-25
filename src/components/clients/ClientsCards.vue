@@ -1,5 +1,18 @@
 <template>
   <div class="cards-container">
+    <div class="cards-header" v-if="pagination && pagination.total >= 0">
+      <Pagination 
+        :current-page="pagination.currentPage"
+        :total-pages="pagination.lastPage"
+        :per-page="pagination.perPage"
+        :total="pagination.total"
+        :from="paginationFrom"
+        :to="paginationTo"
+        @page-change="$emit('page-change', $event)"
+        @per-page-change="$emit('per-page-change', $event)"
+      />
+    </div>
+    
     <div class="client-card" v-for="client in clients" :key="client.id">
       <div class="card-header">
         <h3 class="client-name">{{ client.name }}</h3>
@@ -27,19 +40,6 @@
           <span class="value">{{ formatDate(client.created_at) }}</span>
         </div>
       </div>
-    </div>
-    
-    <div class="cards-pagination" v-if="pagination && pagination.total >= 0">
-      <Pagination 
-        :current-page="pagination.currentPage"
-        :total-pages="pagination.lastPage"
-        :per-page="pagination.perPage"
-        :total="pagination.total"
-        :from="paginationFrom"
-        :to="paginationTo"
-        @page-change="$emit('page-change', $event)"
-        @per-page-change="$emit('per-page-change', $event)"
-      />
     </div>
   </div>
 </template>
@@ -99,7 +99,14 @@ const formatDate = (dateString: string): string => {
 .cards-container {
   display: grid;
   gap: 1rem;
-  padding: 1rem;
+  padding: 0;
+}
+
+.cards-header {
+  background-color: white;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.5rem;
 }
 
 .client-card {
@@ -108,13 +115,14 @@ const formatDate = (dateString: string): string => {
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   border: 1px solid #e5e7eb;
   overflow: hidden;
+  margin: 0 1rem 1rem;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   background-color: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -158,11 +166,6 @@ const formatDate = (dateString: string): string => {
   text-align: right;
   word-break: break-word;
   max-width: 60%;
-}
-
-.cards-pagination {
-  margin-top: 1.5rem;
-  padding: 0 0.5rem;
 }
 
 @media (min-width: 768px) {
