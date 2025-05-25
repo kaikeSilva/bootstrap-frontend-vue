@@ -126,10 +126,7 @@ const menuItems: MenuItem[] = [
   {
     title: "Usuários",
     icon: "users",
-    children: [
-      { title: "Listar Usuários", route: "/usuarios" },
-      { title: "Novo Usuário", route: "/usuarios/novo" }
-    ]
+    route: "/usuarios"
   },
   {
     title: "Sair",
