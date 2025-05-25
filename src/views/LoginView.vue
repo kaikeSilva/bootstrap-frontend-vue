@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h1>Login</h1>
+      <h1 class="login-title">Login</h1>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="email">Email:</label>
@@ -73,11 +73,19 @@ const handleSubmit = async () => {
 
 <style scoped>
 .login-container {
-  min-height: 100vh;
+  height: 100vh; /* Use fixed height instead of min-height */
+  width: 100vw; /* Ensure full width */
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f5f5f5;
+  position: fixed; /* Fix position to viewport */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10; /* Ensure it's above other content */
+  overflow: auto; /* Allow scrolling if needed */
 }
 
 .login-card {
@@ -87,6 +95,15 @@ const handleSubmit = async () => {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   width: 100%;
   max-width: 400px;
+  color: #333;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .form-group {
@@ -96,15 +113,25 @@ const handleSubmit = async () => {
 label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: #222;
+  font-size: 1rem;
 }
 
 input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+  font-size: 1rem;
+  color: #333;
+}
+
+input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 button {

@@ -17,12 +17,6 @@ const router = createRouter({
     },
     {
       path: '/',
-      name: 'home',
-      component: AppLayout,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin',
       component: AppLayout,
       meta: { requiresAuth: true },
       children: [
@@ -62,15 +56,39 @@ const router = createRouter({
 
 // Navigation guards
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
+  // Check if route requires authentication
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth !== false)
-
-  if (requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login' })
-  } else if (to.name === 'login' && authStore.isAuthenticated) {
-    next({ name: 'home' })
-  } else {
+  
+  // If route doesn't require auth, proceed
+  if (!requiresAuth) {
     next()
+    return
+  }
+  
+  // Check auth store first
+  const authStore = useAuthStore()
+  
+  // If authenticated in store, proceed
+  if (authStore.isAuthenticated) {
+    next()
+    return
+  }
+  
+  // If not authenticated in store, check localStorage directly
+  const storedToken = localStorage.getItem('auth_token')
+  const storedUser = localStorage.getItem('auth_user')
+  
+  if (storedToken && storedUser) {
+    // We have stored credentials, manually update the store
+    // This is needed because the store might not be initialized yet
+    authStore.$patch({
+      token: storedToken,
+      user: JSON.parse(storedUser)
+    })
+    next()
+  } else {
+    // No authentication found, redirect to login
+    next({ name: 'login' })
   }
 })
 

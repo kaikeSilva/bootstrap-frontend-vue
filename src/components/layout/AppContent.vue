@@ -45,13 +45,13 @@ const layoutStore = useLayoutStore()
 
 const breadcrumbs = computed<Breadcrumb[]>(() => {
   const crumbs: Breadcrumb[] = [
-    { title: 'Home', path: '/admin/dashboard' }
+    { title: 'Home', path: '/dashboard' }
   ]
   
   if (route.meta.title) {
     if (route.path.includes('/usuarios/novo')) {
       crumbs.push(
-        { title: 'Usuários', path: '/admin/usuarios' },
+        { title: 'Usuários', path: '/usuarios' },
         { title: 'Novo Usuário', path: route.path }
       )
     } else {

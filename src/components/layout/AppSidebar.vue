@@ -69,6 +69,7 @@
 import { ref, computed, type Component } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useLayoutStore } from '@/stores/layout'
+import { useAuthStore } from '@/stores/auth'
 
 // Importando os componentes de ícones
 import IconCube from '@/components/icons/IconCube.vue'
@@ -84,6 +85,7 @@ interface MenuItem {
   title: string
   icon: string
   route?: string
+  action?: string
   children?: SubMenuItem[]
 }
 
@@ -119,25 +121,25 @@ const menuItems: MenuItem[] = [
   {
     title: "Dashboard",
     icon: "home",
-    route: "/admin/dashboard"
+    route: "/dashboard"
   },
   {
     title: "Clientes",
     icon: "users",
-    route: "/admin/clientes"
+    route: "/clientes"
   },
   {
     title: "Usuários",
     icon: "users",
     children: [
-      { title: "Listar Usuários", route: "/admin/usuarios" },
-      { title: "Novo Usuário", route: "/admin/usuarios/novo" }
+      { title: "Listar Usuários", route: "/usuarios" },
+      { title: "Novo Usuário", route: "/usuarios/novo" }
     ]
   },
   {
     title: "Sair",
     icon: "signOut",
-    route: "/logout"
+    action: "logout"
   }
 ]
 
@@ -145,6 +147,8 @@ const sidebarClasses = computed(() => ({
   'sidebar-visible': layoutStore.isSidebarVisible,
   'sidebar-collapsed': layoutStore.isSidebarCollapsed
 }))
+
+const authStore = useAuthStore()
 
 function handleMenuClick(item: MenuItem) {
   if (item.children) {
@@ -154,6 +158,10 @@ function handleMenuClick(item: MenuItem) {
     } else {
       expandedItems.value.push(item.title)
     }
+  } else if (item.action === 'logout') {
+    // Handle logout action
+    authStore.logout()
+    router.push('/login')
   } else if (item.route) {
     navigateTo(item.route)
   }

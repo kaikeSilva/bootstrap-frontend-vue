@@ -19,32 +19,84 @@
       </div>
       
       <div v-else>
-        <ClientsTable :clients="clients" />
-        <ClientsCards :clients="clients" />
+        <ClientsTable 
+          :clients="clients" 
+          :pagination="{
+            currentPage: currentPage,
+            lastPage: lastPage,
+            perPage: perPage,
+            total: total,
+            links: paginationLinks
+          }"
+          @page-change="handlePageChange"
+          @per-page-change="handlePerPageChange"
+        />
+        <ClientsCards 
+          :clients="clients"
+          :pagination="{
+            currentPage: currentPage,
+            lastPage: lastPage,
+            perPage: perPage,
+            total: total,
+            links: paginationLinks
+          }"
+          @page-change="handlePageChange"
+          @per-page-change="handlePerPageChange"
+        />
       </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useClientsStore } from '@/stores/clientsStore'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
 import ClientsTable from '@/components/clients/ClientsTable.vue'
 import ClientsCards from '@/components/clients/ClientsCards.vue'
+import Pagination from '@/components/common/Pagination.vue'
 
 const clientsStore = useClientsStore()
-const { clients, loading, error } = storeToRefs(clientsStore)
+const { 
+  clients, 
+  loading, 
+  error, 
+  currentPage, 
+  lastPage, 
+  perPage, 
+  total,
+  paginationLinks 
+} = storeToRefs(clientsStore)
+
+// Calculate pagination info
+const hasPagination = computed(() => total.value > 0)
+const paginationFrom = computed(() => {
+  if (clients.value.length === 0) return 0
+  return ((currentPage.value - 1) * perPage.value) + 1
+})
+const paginationTo = computed(() => {
+  if (clients.value.length === 0) return 0
+  return Math.min(paginationFrom.value + clients.value.length - 1, total.value)
+})
 
 const handleRetry = () => {
   clientsStore.clearError()
-  clientsStore.fetchClients()
+  clientsStore.fetchClients(currentPage.value, perPage.value)
+}
+
+const handlePageChange = (page: number) => {
+  clientsStore.fetchClients(page, perPage.value)
+}
+
+const handlePerPageChange = (newPerPage: number) => {
+  // When changing items per page, go back to page 1
+  clientsStore.fetchClients(1, newPerPage)
 }
 
 onMounted(() => {
-  clientsStore.fetchClients()
+  clientsStore.fetchClients(currentPage.value, perPage.value)
 })
 </script>
 

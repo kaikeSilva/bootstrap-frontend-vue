@@ -1,46 +1,52 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Client } from '@/types/client.types'
+import type { Client, PaginationLinks } from '@/types/client.types'
 import { clientsService } from '@/services/clientsService'
 
 export const useClientsStore = defineStore('clients', () => {
   const clients = ref<Client[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const currentPage = ref(1)
+  const lastPage = ref(1)
+  const perPage = ref(15)
+  const total = ref(0)
+  const paginationLinks = ref<PaginationLinks | null>(null)
 
-  const fetchClients = async () => {
+  const fetchClients = async (page: number = 1, itemsPerPage: number = 15) => {
     loading.value = true
     error.value = null
     
     try {
-      console.log('Store: Fetching clients...')
-      const data = await clientsService.getClients()
-      console.log('Store: Received data structure:', JSON.stringify(data))
+      console.log('Store: Fetching clients...', { page, itemsPerPage })
+      const response = await clientsService.getClients({
+        page,
+        per_page: itemsPerPage
+      })
       
-      // Check if data is in the expected format or needs to be extracted from a wrapper
-      if (Array.isArray(data)) {
-        clients.value = data
-        console.log('Store: Data is an array, assigned directly')
-      } else if (data && typeof data === 'object') {
-        // Try to find an array property in the response
-        const possibleArrayProps = ['data', 'clients', 'results', 'items']
-        for (const prop of possibleArrayProps) {
-          if (Array.isArray(data[prop])) {
-            clients.value = data[prop]
-            console.log(`Store: Found array in data.${prop}, assigned to clients`)
-            break
-          }
+      console.log('Store: Received paginated response:', response)
+      
+      // Extract data and pagination info
+      if (response && response.data) {
+        clients.value = response.data
+        
+        // Update pagination state
+        if (response.meta) {
+          currentPage.value = response.meta.current_page
+          lastPage.value = response.meta.last_page
+          perPage.value = response.meta.per_page
+          total.value = response.meta.total
         }
         
-        // If we couldn't find an array, log the issue
-        if (clients.value.length === 0) {
-          console.warn('Store: Could not find client array in response:', data)
+        // Update pagination links
+        if (response.links) {
+          paginationLinks.value = response.links
         }
+        
+        console.log('Store: Updated clients and pagination info')
       } else {
-        console.error('Store: Unexpected data format:', data)
+        console.error('Store: Unexpected response format:', response)
       }
-      
-      console.log('Store: Final clients array:', clients.value)
     } catch (err) {
       error.value = 'Erro ao carregar clientes. Tente novamente.'
       console.error('Store error:', err)
@@ -57,6 +63,11 @@ export const useClientsStore = defineStore('clients', () => {
     clients,
     loading,
     error,
+    currentPage,
+    lastPage,
+    perPage,
+    total,
+    paginationLinks,
     fetchClients,
     clearError
   }

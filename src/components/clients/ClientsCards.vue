@@ -28,17 +28,60 @@
         </div>
       </div>
     </div>
+    
+    <div class="cards-pagination" v-if="pagination && pagination.total >= 0">
+      <Pagination 
+        :current-page="pagination.currentPage"
+        :total-pages="pagination.lastPage"
+        :per-page="pagination.perPage"
+        :total="pagination.total"
+        :from="paginationFrom"
+        :to="paginationTo"
+        @page-change="$emit('page-change', $event)"
+        @per-page-change="$emit('per-page-change', $event)"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Client } from '@/types/client.types'
+import { computed } from 'vue'
+import type { Client, PaginationLinks } from '@/types/client.types'
+import Pagination from '@/components/common/Pagination.vue'
 
-interface Props {
-  clients: Client[]
+interface PaginationInfo {
+  currentPage: number;
+  lastPage: number;
+  perPage: number;
+  total: number;
+  links: PaginationLinks | null;
 }
 
-defineProps<Props>()
+interface Props {
+  clients: Client[];
+  pagination?: PaginationInfo | null;
+}
+
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  (e: 'page-change', page: number): void;
+  (e: 'per-page-change', perPage: number): void;
+}>()
+
+// Calculate pagination info for display
+const paginationFrom = computed(() => {
+  if (!props.pagination || props.clients.length === 0) return 0
+  return ((props.pagination.currentPage - 1) * props.pagination.perPage) + 1
+})
+
+const paginationTo = computed(() => {
+  if (!props.pagination || props.clients.length === 0) return 0
+  return Math.min(
+    paginationFrom.value + props.clients.length - 1, 
+    props.pagination.total
+  )
+})
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
@@ -115,6 +158,11 @@ const formatDate = (dateString: string): string => {
   text-align: right;
   word-break: break-word;
   max-width: 60%;
+}
+
+.cards-pagination {
+  margin-top: 1.5rem;
+  padding: 0 0.5rem;
 }
 
 @media (min-width: 768px) {

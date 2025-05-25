@@ -19,10 +19,7 @@
         :alt="userStore.userName"
         class="user-avatar"
       >
-      
-      <button class="logout-btn" @click="userStore.logout()">
-        <IconSignOut />
-      </button>
+
     </div>
   </header>
 </template>
