@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useClientsStore } from '@/stores/clientsStore'
@@ -68,6 +68,8 @@ import Pagination from '@/components/common/Pagination.vue'
 
 const router = useRouter()
 const clientsStore = useClientsStore()
+
+
 const { 
   clients, 
   loading, 

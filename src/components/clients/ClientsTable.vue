@@ -17,15 +17,6 @@
       <table class="clients-table">
         <thead>
           <tr>
-            <th @click="handleSort('id')" class="sortable-header">
-              ID
-              <IconSort 
-                v-if="props.sortBy === 'id'" 
-                :type="props.sortDirection" 
-                size="14" 
-                class="sort-icon"
-              />
-            </th>
             <th @click="handleSort('name')" class="sortable-header">
               Nome
               <IconSort 
@@ -62,25 +53,46 @@
                 class="sort-icon"
               />
             </th>
-            <th @click="handleSort('created_at')" class="sortable-header">
-              Data de Cadastro
-              <IconSort 
-                v-if="props.sortBy === 'created_at'" 
-                :type="props.sortDirection" 
-                size="14" 
-                class="sort-icon"
-              />
+            <th class="actions-header">
+              Ações
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="client in clients" :key="client.id" class="table-row">
-            <td>{{ client.id }}</td>
-            <td>{{ client.name }}</td>
+            <td>
+              <div class="client-name-container">
+                <div class="client-name">{{ client.name }}</div>
+                <div class="client-meta">
+                  <span class="client-id">ID: {{ client.id }}</span>
+                  <span class="client-date">Cadastro: {{ formatDate(client.created_at) }}</span>
+                </div>
+              </div>
+            </td>
             <td>{{ client.email }}</td>
             <td>{{ client.phone || '-' }}</td>
             <td>{{ client.address || '-' }}</td>
-            <td>{{ formatDate(client.created_at) }}</td>
+            <td class="actions-cell">
+              <div class="actions-menu">
+                <button class="actions-button" @click="toggleMenu(client.id)">
+                  <IconEllipsis size="18" />
+                </button>
+                <div v-if="activeMenu === client.id" class="actions-dropdown">
+                  <div class="dropdown-item" @click="handleView(client.id)">
+                    <IconView size="16" />
+                    <span>Visualizar</span>
+                  </div>
+                  <div class="dropdown-item" @click="handleEdit(client.id)">
+                    <IconEdit size="16" />
+                    <span>Editar</span>
+                  </div>
+                  <div class="dropdown-item delete" @click="handleDelete(client.id)">
+                    <IconDelete size="16" />
+                    <span>Excluir</span>
+                  </div>
+                </div>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -89,12 +101,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useClientsStore } from '@/stores/clientsStore'
 import type { Client, PaginationLinks } from '@/types/client.types'
 import Pagination from '@/components/common/Pagination.vue'
 import IconSort from '@/components/icons/IconSort.vue'
+import IconEllipsis from '@/components/icons/IconEllipsis.vue'
+import IconView from '@/components/icons/IconView.vue'
+import IconEdit from '@/components/icons/IconEdit.vue'
+import IconDelete from '@/components/icons/IconDelete.vue'
+
+const router = useRouter()
 
 interface PaginationInfo {
   currentPage: number;
@@ -123,6 +142,52 @@ const emit = defineEmits<{
 interface SortProps {
   sortBy: string;
   sortDirection: 'asc' | 'desc';
+}
+
+// Controle do menu de ações
+const activeMenu = ref<number | null>(null)
+
+const toggleMenu = (clientId: number) => {
+  if (activeMenu.value === clientId) {
+    activeMenu.value = null
+  } else {
+    activeMenu.value = clientId
+  }
+}
+
+// Fechar o menu quando clicar fora dele
+const closeMenuOnClickOutside = (event: MouseEvent) => {
+  if (activeMenu.value !== null) {
+    const target = event.target as HTMLElement
+    if (!target.closest('.actions-menu')) {
+      activeMenu.value = null
+    }
+  }
+}
+
+// Adicionar e remover o listener quando o componente é montado/desmontado
+onMounted(() => {
+  document.addEventListener('click', closeMenuOnClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeMenuOnClickOutside)
+})
+
+// Ações do menu
+const handleView = (clientId: number) => {
+  router.push({ name: 'client-details', params: { id: clientId.toString() } })
+  activeMenu.value = null
+}
+
+const handleEdit = (clientId: number) => {
+  console.log(`Editar cliente ${clientId}`)
+  activeMenu.value = null
+}
+
+const handleDelete = (clientId: number) => {
+  console.log(`Excluir cliente ${clientId}`)
+  activeMenu.value = null
 }
 
 const handleSort = (field: string) => {
@@ -217,11 +282,103 @@ const formatDate = (dateString: string): string => {
 
 .clients-table td {
   color: #111827; /* Darker text color for better readability */
-  font-weight: 500; /* Slightly bolder text */
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.client-name-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.client-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.client-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.client-id, .client-date {
+  display: inline-block;
 }
 
 .table-row:hover {
   background-color: #f9fafb;
+}
+
+/* Estilos para a coluna de ações */
+.actions-header {
+  width: 80px;
+  text-align: center;
+}
+
+.actions-cell {
+  text-align: center;
+  position: relative;
+}
+
+.actions-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.actions-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.actions-button:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.actions-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-width: 150px;
+  z-index: 10;
+  margin-top: 5px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #374151;
+}
+
+.dropdown-item:hover {
+  background-color: #f9fafb;
+}
+
+.dropdown-item.delete {
+  color: #ef4444;
+}
+
+.dropdown-item.delete:hover {
+  background-color: #fee2e2;
 }
 
 @media (min-width: 768px) {

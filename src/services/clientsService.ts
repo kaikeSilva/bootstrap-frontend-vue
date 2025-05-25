@@ -23,6 +23,23 @@ export const clientsService = {
     }
   },
   
+  async getClientById(id: number): Promise<Client> {
+    try {
+      console.log(`Buscando cliente com ID: ${id}`)
+      const response = await api.get(`/clients/${id}`)
+      
+      // A API retorna os dados dentro de um objeto 'data'
+      if (response.data && response.data.data) {
+        return response.data.data
+      }
+      
+      return response.data
+    } catch (error) {
+      console.error(`Erro ao buscar cliente com ID ${id}:`, error)
+      throw error
+    }
+  },
+  
   async createClient(clientData: Partial<Client>): Promise<Client> {
     try {
       console.log('Creating new client:', clientData)

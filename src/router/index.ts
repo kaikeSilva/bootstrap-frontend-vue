@@ -39,6 +39,15 @@ const router = createRouter({
           meta: { title: 'Novo Cliente' }
         },
         {
+          path: 'clientes/:id',
+          name: 'client-details',
+          component: () => import('../views/ClientDetailsView.vue'),
+          meta: { 
+            title: 'Detalhes do Cliente',
+            parent: 'clients'
+          }
+        },
+        {
           path: 'usuarios',
           name: 'usuarios',
           component: () => import('../views/AboutView.vue'),

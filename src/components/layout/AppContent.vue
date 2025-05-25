@@ -30,10 +30,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useLayoutStore } from '@/stores/layout'
 import IconHome from '@/components/icons/IconHome.vue'
 import IconChevronRight from '@/components/icons/IconChevronRight.vue'
+
+const router = useRouter()
 
 interface Breadcrumb {
   title: string
@@ -49,12 +51,32 @@ const breadcrumbs = computed<Breadcrumb[]>(() => {
   ]
   
   if (route.meta.title) {
+    // Caso especial para usuários/novo
     if (route.path.includes('/usuarios/novo')) {
       crumbs.push(
         { title: 'Usuários', path: '/usuarios' },
         { title: 'Novo Usuário', path: route.path }
       )
-    } else {
+    } 
+    // Caso para rotas com parent definido
+    else if (route.meta.parent) {
+      // Encontrar a rota pai
+      const parentRoute = router.getRoutes().find(r => r.name === route.meta.parent)
+      
+      if (parentRoute && parentRoute.meta && parentRoute.meta.title) {
+        crumbs.push({
+          title: parentRoute.meta.title as string,
+          path: parentRoute.path
+        })
+      }
+      
+      crumbs.push({ 
+        title: route.meta.title as string, 
+        path: route.path 
+      })
+    } 
+    // Caso padrão
+    else {
       crumbs.push({ 
         title: route.meta.title as string, 
         path: route.path 

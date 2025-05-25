@@ -15,8 +15,32 @@
     
     <div class="client-card" v-for="client in clients" :key="client.id">
       <div class="card-header">
-        <h3 class="client-name">{{ client.name }}</h3>
-        <span class="client-id">#{{ client.id }}</span>
+        <div class="header-content">
+          <h3 class="client-name">{{ client.name }}</h3>
+          <div class="client-meta">
+            <span class="meta-item">ID: {{ client.id }}</span>
+            <span class="meta-item">Cadastro: {{ formatDate(client.created_at) }}</span>
+          </div>
+        </div>
+        <div class="actions-menu">
+          <button class="actions-button" @click="toggleMenu(client.id)">
+            <IconEllipsis size="18" />
+          </button>
+          <div v-if="activeMenu === client.id" class="actions-dropdown">
+            <div class="dropdown-item" @click="handleView(client.id)">
+              <IconView size="16" />
+              <span>Visualizar</span>
+            </div>
+            <div class="dropdown-item" @click="handleEdit(client.id)">
+              <IconEdit size="16" />
+              <span>Editar</span>
+            </div>
+            <div class="dropdown-item delete" @click="handleDelete(client.id)">
+              <IconDelete size="16" />
+              <span>Excluir</span>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div class="card-body">
@@ -34,20 +58,22 @@
           <span class="label">Endereço:</span>
           <span class="value">{{ client.address || '-' }}</span>
         </div>
-        
-        <div class="card-row">
-          <span class="label">Cadastrado em:</span>
-          <span class="value">{{ formatDate(client.created_at) }}</span>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import type { Client, PaginationLinks } from '@/types/client.types'
 import Pagination from '@/components/common/Pagination.vue'
+import IconEllipsis from '@/components/icons/IconEllipsis.vue'
+import IconView from '@/components/icons/IconView.vue'
+import IconEdit from '@/components/icons/IconEdit.vue'
+import IconDelete from '@/components/icons/IconDelete.vue'
+
+const router = useRouter()
 
 interface PaginationInfo {
   currentPage: number;
@@ -83,15 +109,61 @@ const paginationTo = computed(() => {
   )
 })
 
+// Controle do menu de ações
+const activeMenu = ref<number | null>(null)
+
+const toggleMenu = (clientId: number) => {
+  if (activeMenu.value === clientId) {
+    activeMenu.value = null
+  } else {
+    activeMenu.value = clientId
+  }
+}
+
+// Fechar o menu quando clicar fora dele
+const closeMenuOnClickOutside = (event: MouseEvent) => {
+  if (activeMenu.value !== null) {
+    const target = event.target as HTMLElement
+    if (!target.closest('.actions-menu')) {
+      activeMenu.value = null
+    }
+  }
+}
+
+// Adicionar e remover o listener quando o componente é montado/desmontado
+onMounted(() => {
+  document.addEventListener('click', closeMenuOnClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeMenuOnClickOutside)
+})
+
+// Ações do menu
+const handleView = (clientId: number) => {
+  router.push({ name: 'client-details', params: { id: clientId.toString() } })
+  activeMenu.value = null
+}
+
+const handleEdit = (clientId: number) => {
+  console.log(`Editar cliente ${clientId}`)
+  activeMenu.value = null
+}
+
+const handleDelete = (clientId: number) => {
+  console.log(`Excluir cliente ${clientId}`)
+  activeMenu.value = null
+}
+
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
+  return new Intl.DateTimeFormat('pt-BR', {
     year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit'
-  })
+  }).format(date)
 }
 </script>
 
@@ -118,10 +190,15 @@ const formatDate = (dateString: string): string => {
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 0.75rem 1rem;
   background-color: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .client-name {
@@ -131,10 +208,72 @@ const formatDate = (dateString: string): string => {
   margin: 0;
 }
 
-.client-id {
-  font-size: 0.875rem;
+.client-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
   color: #6b7280;
-  font-weight: 500;
+}
+
+.meta-item {
+  display: inline-block;
+}
+
+/* Estilos para o menu de ações */
+.actions-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.actions-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.actions-button:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.actions-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-width: 150px;
+  z-index: 10;
+  margin-top: 5px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #374151;
+}
+
+.dropdown-item:hover {
+  background-color: #f9fafb;
+}
+
+.dropdown-item.delete {
+  color: #ef4444;
+}
+
+.dropdown-item.delete:hover {
+  background-color: #fee2e2;
 }
 
 .card-body {
