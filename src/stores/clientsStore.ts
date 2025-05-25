@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import type { Client, PaginationLinks } from '@/types/client.types'
 import { clientsService } from '@/services/clientsService'
 
@@ -12,17 +12,44 @@ export const useClientsStore = defineStore('clients', () => {
   const perPage = ref(15)
   const total = ref(0)
   const paginationLinks = ref<PaginationLinks | null>(null)
+  const activeFilters = reactive<Record<string, string>>({})
 
-  const fetchClients = async (page: number = 1, itemsPerPage: number = 15) => {
+  const fetchClients = async (page: number = 1, itemsPerPage: number = 15, filters?: Record<string, string>) => {
     loading.value = true
     error.value = null
     
     try {
-      console.log('Store: Fetching clients...', { page, itemsPerPage })
-      const response = await clientsService.getClients({
+      console.log('Store: Fetching clients...', { page, itemsPerPage, filters })
+      
+      // Se filtros foram fornecidos, atualize os filtros ativos
+      if (filters) {
+        // Limpar filtros ativos anteriores
+        Object.keys(activeFilters).forEach(key => {
+          delete activeFilters[key]
+        })
+        
+        // Adicionar novos filtros
+        Object.entries(filters).forEach(([key, value]) => {
+          activeFilters[key] = value
+        })
+      }
+      
+      // Preparar parâmetros para a requisição
+      const params: {
+        page: number;
+        per_page: number;
+        filter?: Record<string, string>;
+      } = {
         page,
         per_page: itemsPerPage
-      })
+      }
+      
+      // Adicionar filtros à requisição se houver filtros ativos
+      if (Object.keys(activeFilters).length > 0) {
+        params.filter = { ...activeFilters }
+      }
+      
+      const response = await clientsService.getClients(params)
       
       console.log('Store: Received paginated response:', response)
       
@@ -55,6 +82,16 @@ export const useClientsStore = defineStore('clients', () => {
     }
   }
 
+  const clearFilters = async () => {
+    // Limpar filtros ativos
+    Object.keys(activeFilters).forEach(key => {
+      delete activeFilters[key]
+    })
+    
+    // Recarregar clientes sem filtros
+    await fetchClients(1, perPage.value)
+  }
+
   const clearError = () => {
     error.value = null
   }
@@ -68,7 +105,9 @@ export const useClientsStore = defineStore('clients', () => {
     perPage,
     total,
     paginationLinks,
+    activeFilters,
     fetchClients,
+    clearFilters,
     clearError
   }
 })

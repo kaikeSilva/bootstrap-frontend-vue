@@ -103,9 +103,6 @@ const formatDate = (dateString: string): string => {
 }
 
 .cards-header {
-  background-color: white;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
   margin-bottom: 0.5rem;
 }
 
@@ -115,7 +112,7 @@ const formatDate = (dateString: string): string => {
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   border: 1px solid #e5e7eb;
   overflow: hidden;
-  margin: 0 1rem 1rem;
+  margin: 0 0.5rem 0.5rem;
 }
 
 .card-header {

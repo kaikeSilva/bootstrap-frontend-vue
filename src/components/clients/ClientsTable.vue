@@ -100,9 +100,7 @@ const formatDate = (dateString: string): string => {
 }
 
 .table-header {
-  background-color: white;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.5rem;
 }
 
 .table-responsive {

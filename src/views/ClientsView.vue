@@ -1,11 +1,13 @@
 <template>
   <div class="clients-view">
-    <header class="page-header">
-      <h1 class="page-title">Clientes</h1>
-      <p class="page-description">Visualize todos os clientes cadastrados</p>
-    </header>
-
     <main class="page-content">
+      <div class="filter-section">
+        <ClientsFilter 
+          @filter="handleFilter"
+          @clear="handleClearFilter"
+        />
+      </div>
+      
       <LoadingSpinner v-if="loading" />
       
       <ErrorMessage 
@@ -56,6 +58,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
 import ClientsTable from '@/components/clients/ClientsTable.vue'
 import ClientsCards from '@/components/clients/ClientsCards.vue'
+import ClientsFilter from '@/components/clients/ClientsFilter.vue'
 import Pagination from '@/components/common/Pagination.vue'
 
 const clientsStore = useClientsStore()
@@ -67,7 +70,8 @@ const {
   lastPage, 
   perPage, 
   total,
-  paginationLinks 
+  paginationLinks,
+  activeFilters 
 } = storeToRefs(clientsStore)
 
 // Calculate pagination info
@@ -95,6 +99,16 @@ const handlePerPageChange = (newPerPage: number) => {
   clientsStore.fetchClients(1, newPerPage)
 }
 
+const handleFilter = (filters: Record<string, string>) => {
+  // Aplicar filtros e voltar para a página 1
+  clientsStore.fetchClients(1, perPage.value, filters)
+}
+
+const handleClearFilter = () => {
+  // Limpar filtros e recarregar dados
+  clientsStore.clearFilters()
+}
+
 onMounted(() => {
   clientsStore.fetchClients(currentPage.value, perPage.value)
 })
@@ -106,32 +120,21 @@ onMounted(() => {
   background-color: #f9fafb;
 }
 
-.page-header {
-  background: white;
-  padding: 1rem 2rem; /* Reduced vertical padding from 2rem to 1rem */
-  border-bottom: 1px solid #e5e7eb;
-}
 
-.page-title {
-  font-size: 1.5rem; /* Reduced from 2rem to 1.5rem */
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 0.25rem 0; /* Reduced bottom margin from 0.5rem to 0.25rem */
-}
-
-.page-description {
-  color: #6b7280;
-  margin: 0;
-  font-size: 0.875rem; /* Reduced from 1rem to 0.875rem */
-}
 
 .page-content {
   padding: 0; /* Removed all padding to allow table to use full width */
 }
 
+.filter-section {
+  padding: 0.5rem 0.5rem 0 0.5rem;
+  background-color: #f9fafb;
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem;
+  margin: 1rem;
   background: white;
   border-radius: 0.375rem;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);

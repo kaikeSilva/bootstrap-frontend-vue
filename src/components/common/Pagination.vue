@@ -159,7 +159,10 @@ const visiblePageNumbers = computed(() => {
   align-items: center;
   width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .pagination-left {
