@@ -1,5 +1,5 @@
 <template>
-  <div class="client-details-container">
+  <div class="client-details-container" >
 
     <div v-if="loading" class="loading-container">
       <LoadingSpinner />
@@ -193,12 +193,15 @@ const formatDate = (dateString: string): string => {
 
 <style scoped>
 .client-details-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
   padding: 1.5rem;
 }
 
-
+.client-details {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
 .client-actions {
   display: flex;
@@ -259,6 +262,29 @@ const formatDate = (dateString: string): string => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .client-header-main {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+  
+  .client-actions {
+    margin-left: 0;
+    margin-bottom: 1rem;
+    width: 100%;
+    justify-content: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .edit-button, .delete-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
 }
 
 .client-name {
@@ -284,6 +310,7 @@ const formatDate = (dateString: string): string => {
   display: flex;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 1.5rem;
+  width: 100%;
 }
 
 .tab {
@@ -298,6 +325,10 @@ const formatDate = (dateString: string): string => {
 .tab.active {
   color: #4f46e5;
   border-bottom-color: #4f46e5;
+}
+
+.tab-content {
+  width: 100%;
 }
 
 .client-header {
