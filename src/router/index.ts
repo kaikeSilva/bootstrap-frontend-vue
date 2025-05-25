@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import DashboardView from '@/views/DashboardView.vue'
-import ClientsView from '@/views/ClientsView.vue'
+import ClientsView from '@/views/clients/ClientsView.vue'
 import LoginView from '@/views/LoginView.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -35,13 +35,13 @@ const router = createRouter({
         {
           path: 'clientes/novo',
           name: 'new-client',
-          component: () => import('../views/ClientFormView.vue'),
+          component: () => import('../views/clients/ClientFormView.vue'),
           meta: { title: 'Novo Cliente' }
         },
         {
           path: 'clientes/:id/editar',
           name: 'edit-client',
-          component: () => import('../views/ClientFormView.vue'),
+          component: () => import('../views/clients/ClientFormView.vue'),
           meta: { 
             title: 'Editar Cliente',
             parent: 'clients'
@@ -50,7 +50,7 @@ const router = createRouter({
         {
           path: 'clientes/:id',
           name: 'client-details',
-          component: () => import('../views/ClientDetailsView.vue'),
+          component: () => import('../views/clients/ClientDetailsView.vue'),
           meta: { 
             title: 'Detalhes do Cliente',
             parent: 'clients'
